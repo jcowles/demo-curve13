@@ -2,6 +2,14 @@ var camera, scene, renderer;
 var geometry, material, mesh;
 var stats;
 
+// Global namespace
+F = {}
+
+// shortcut for console.log
+function log(msg) {
+    console.log(msg);
+}
+
 function init() {
     stats = new Stats();
     stats.domElement.style.position	= 'absolute';

@@ -7,15 +7,18 @@
 
         <!-- our stuff -->
         <script src="js/core.js"></script>
+        <script src="js/shot.js"></script>
+        <script src="js/shots/warp_1.js"></script>
+        <script src="js/shots/circleBlast_1.js"></script>
     </head>
     <body style="margin: 0; padding:0;">
         <script>
+            //
+            // Example GUI 
+            // 
             var FizzyText = function() {
-              this.message = 'dat.gui';
               this.speed = 0.8;
               this.displayOutline = false;
-              this.explode = function() { };
-              // Define render logic ...
             };
 
             //
@@ -24,13 +27,14 @@
             window.onload = function() {
                 var text = new FizzyText();
                 var gui = new dat.GUI();
-                gui.add(text, 'message');
                 gui.add(text, 'speed', -5, 5);
                 gui.add(text, 'displayOutline');
-                gui.add(text, 'explode');
 
                 init();
                 animate();
+
+                cb = new F.Shots.CircleBlast_1(5);
+                w1 = new F.Shots.Warp_1(5);
             };
 
         </script>        
