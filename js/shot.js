@@ -25,6 +25,7 @@ F.Shot = function(name, duration) {
     // Unfettered access to the sequencer, renderer: careful.
     this.seq = null;
     this.renderer = null;
+    this.composer = null;
 
     // Local scene
     this.scene = null;

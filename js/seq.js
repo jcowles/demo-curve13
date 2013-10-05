@@ -71,7 +71,13 @@ F.Seq.prototype = {
         curShot.progress = (this.getTime() - curShot.startTime) / curShot.duration;
         curShot.onDraw(this.getTime(), dt);
 
-        this.renderer.render( curShot.scene, curShot.camera );
+        // Render, optionally using the per-shot EffectComposer.
+        if (curShot.composer != null) {
+            this.renderer.clear();
+            curShot.composer.render();
+        } else {
+            this.renderer.render( curShot.scene, curShot.camera );
+        }
     },
 
     addShot: function(shot) {
