@@ -8,28 +8,16 @@
         <!-- our stuff -->
         <script src="js/core.js"></script>
         <script src="js/shot.js"></script>
+        <script src="js/seq.js"></script>
         <script src="js/shots/warp_1.js"></script>
         <script src="js/shots/circleBlast_1.js"></script>
     </head>
     <body style="margin: 0; padding:0;">
         <script>
             //
-            // Example GUI 
-            // 
-            var FizzyText = function() {
-              this.speed = 0.8;
-              this.displayOutline = false;
-            };
-
-            //
             // Main entry point
             //
             window.onload = function() {
-                var text = new FizzyText();
-                var gui = new dat.GUI();
-                gui.add(text, 'speed', -5, 5);
-                gui.add(text, 'displayOutline');
-
                 init();
                 animate();
             };
