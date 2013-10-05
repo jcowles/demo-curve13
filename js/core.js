@@ -25,23 +25,27 @@ function init() {
 
     scene = new THREE.Scene();
 
-
     initCube();
     initWarp();
 
-
-
     renderer = new THREE.WebGLRenderer({
-            antialias               : true,                // to get smoother output
-	        preserveDrawingBuffer   : true     // to allow screenshot
+            antialias               : true,    // to get smoother output
+            preserveDrawingBuffer   : true     // to allow screenshot
             });
     renderer.setSize( window.innerWidth, window.innerHeight );
 
     document.body.appendChild( renderer.domElement );
 
-    seq = new F.Seq();
+    seq = new F.Seq(renderer);
+
+    // Time units are ms
+    seq.addShot(new F.Shots.CircleBlast_1(1));
+    seq.addShot(new F.Shots.Warp_1(2));
+    seq.addShot(new F.Shots.CircleBlast_1(3));
+    seq.addShot(new F.Shots.Warp_1(4));
     seq.addShot(new F.Shots.CircleBlast_1(5));
-    seq.addShot(new F.Shots.Warp_1(5));
+
+    seq.preload();
     seq.play();
 }
 

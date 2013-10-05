@@ -5,40 +5,6 @@
 F.Shots = {};
 
 //
-// The Sequence object
-//
-
-F.Seq = function() {
-    var autostart = false;
-    this.clock = new THREE.Clock(autostart); 
-    this.shots = [];
-};
-
-F.Seq.prototype = {
-    play: function() {
-        if (!this.shots.length) {
-            warn("F.Seq cannot play: no shots added");
-            return;
-        }
-        this.clock.start();
-    },
-
-    pause: function() {
-        this.clock.stop();
-    },
-
-    update: function() {
-        if (!this.clock.running)
-            return;
-    },
-
-    addShot: function(shot) {
-        this.shots.push(shot);
-    }
-};
-
-
-//
 // The Shot base class
 //
 F.Shot = function(name, duration) {
@@ -53,21 +19,43 @@ F.Shot = function(name, duration) {
 
     // (worldTime - startTime) / duration
     this.progress = 0;
+
+    this.gui = null;
+
+    // Unfettered access to the sequencer, renderer: careful.
+    this.seq = null;
+    this.renderer = null;
+
+    // Local scene
+    this.scene = null;
+    this.camera = null;
 };
 
 
 F.Shot.prototype = {
     onPreload: function() {
+        log("Preload shot: " + this.name);
     },
     
     onBegin: function() {
+        log(" ");
+        log(this.name + ":");
+        log("\tstart time: " + this.startTime.toFixed(3).toString());
     },
 
     onEnd: function() {
+        t = seq.getTime() - this.startTime;
+        t = t.toFixed(3);
+        log("End shot: " + this.name); 
+        log("\tran for " + t.toString() +
+            " (" + ((this.duration - t) / this.duration * 100).toFixed(1).toString()  +
+            " %err)");
+        log("\tend time: " + this.seq.getTime().toFixed(3).toString());
     },
 
-    onDraw: function(time, lastTime, dt) {
+    onDraw: function(time, dt) {
     }
+
 };
 
 
