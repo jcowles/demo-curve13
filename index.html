@@ -1,14 +1,38 @@
 <html>
     <head>
+        <!-- 3rd party libs -->
         <script src="js/three.min.js"></script>
         <script src="js/stats.min.js"></script>
+        <script src="js/dat.gui.min.js"></script>
+
+        <!-- our stuff -->
         <script src="js/core.js"></script>
     </head>
-    <body>
+    <body style="margin: 0; padding:0;">
         <script>
-            init();
-            animate();
-        </script>        
+            var FizzyText = function() {
+              this.message = 'dat.gui';
+              this.speed = 0.8;
+              this.displayOutline = false;
+              this.explode = function() { };
+              // Define render logic ...
+            };
 
+            //
+            // Main entry point
+            //
+            window.onload = function() {
+                var text = new FizzyText();
+                var gui = new dat.GUI();
+                gui.add(text, 'message');
+                gui.add(text, 'speed', -5, 5);
+                gui.add(text, 'displayOutline');
+                gui.add(text, 'explode');
+
+                init();
+                animate();
+            };
+
+        </script>        
     </body>
 </html>
