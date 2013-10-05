@@ -5,6 +5,40 @@
 F.Shots = {};
 
 //
+// The Sequence object
+//
+
+F.Seq = function() {
+    var autostart = false;
+    this.clock = new THREE.Clock(autostart); 
+    this.shots = [];
+};
+
+F.Seq.prototype = {
+    play: function() {
+        if (!this.shots.length) {
+            warn("F.Seq cannot play: no shots added");
+            return;
+        }
+        this.clock.start();
+    },
+
+    pause: function() {
+        this.clock.stop();
+    },
+
+    update: function() {
+        if (!this.clock.running)
+            return;
+    },
+
+    addShot: function(shot) {
+        this.shots.push(shot);
+    }
+};
+
+
+//
 // The Shot base class
 //
 F.Shot = function(name, duration) {
@@ -19,7 +53,7 @@ F.Shot = function(name, duration) {
 
     // (worldTime - startTime) / duration
     this.progress = 0;
-}
+};
 
 
 F.Shot.prototype = {
@@ -32,7 +66,9 @@ F.Shot.prototype = {
     onEnd: function() {
     },
 
-    onDraw: function(time, dt) {
+    onDraw: function(time, lastTime, dt) {
     }
 };
+
+
 

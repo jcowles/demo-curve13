@@ -1,6 +1,6 @@
 var camera, scene, renderer;
 var geometry, material, mesh;
-var stats;
+var stats, seq;
 
 // Global namespace
 F = {}
@@ -37,6 +37,10 @@ function init() {
 
     document.body.appendChild( renderer.domElement );
 
+    seq = new F.Seq();
+    seq.addShot(new F.Shots.CircleBlast_1(5));
+    seq.addShot(new F.Shots.Warp_1(5));
+    seq.play();
 }
 
 function animate() {
@@ -50,5 +54,6 @@ function animate() {
     renderer.render( scene, camera );
 
     stats.update();
+    seq.update();
 }
 
