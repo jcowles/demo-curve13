@@ -54,6 +54,10 @@ F.Shot.prototype = {
     },
 
     onDraw: function(time, dt) {
+    },
+
+    getGui: function() {
+        return null;
     }
 
 };

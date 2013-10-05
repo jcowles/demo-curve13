@@ -2,23 +2,48 @@
 
 F.Shots.CircleBlast_1 = function(duration) {
     F.Shot.call(this, "CircleBlast_1", duration);
+    this.mesh = null;
 };
 
 proto = Object.create(F.Shot.prototype);
 
-proto.onPreload = function() {
+proto.onDraw = function(time, dt) {
+    this.mesh.rotation.x += 0.01;
+    this.mesh.rotation.y += 0.02;
+}
 
+proto.getGui = function() {
+    //
+    // GUI Init
+    //
+    var FizzyText = function() {
+        this.speed = 0.8;
+        this.displayOutline = false;
+    };
+    var gui = new dat.GUI();
+    text = new FizzyText();
+    gui.add(text, 'speed', -5, 5);
+    gui.add(text, 'displayOutline');
+    return gui;
+}
+
+proto.onPreload = function() {
+    // 
+    // Setup Camera & Scene
+    //
     this.camera = new THREE.PerspectiveCamera( 75, 
                                 window.innerWidth / window.innerHeight, 
                                 1, 10000 );
     this.camera.position.z = 1000;
-
     this.scene = new THREE.Scene();
+
+    //
+    // Add some geometry
+    //
     var geometry = new THREE.CubeGeometry( 200, 200, 200 );
     var material = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true } );
-    var mesh = new THREE.Mesh( geometry, material );
-    this.scene.add( mesh );
-
+    this.mesh = new THREE.Mesh( geometry, material );
+    this.scene.add( this.mesh );
 
     /*
     this.camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 1, 1500);
@@ -117,9 +142,6 @@ proto.onPreload = function() {
 
     group.add( textMesh1 );
     */
-}
-
-proto.onDraw = function(time, dt) {
 }
 
 F.Shots.CircleBlast_1.prototype = proto;

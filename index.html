@@ -15,22 +15,9 @@
     <body style="margin: 0; padding:0;">
         <script>
             //
-            // Example GUI 
-            // 
-            var FizzyText = function() {
-              this.speed = 0.8;
-              this.displayOutline = false;
-            };
-
-            //
             // Main entry point
             //
             window.onload = function() {
-                var text = new FizzyText();
-                var gui = new dat.GUI();
-                gui.add(text, 'speed', -5, 5);
-                gui.add(text, 'displayOutline');
-
                 init();
                 animate();
             };
