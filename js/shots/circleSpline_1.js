@@ -3,6 +3,7 @@
 F.Shots.CircleSpline_1 = function(duration) {
     F.Shot.call(this, "CircleSpline_1", duration);
     this.lineGroup = null;
+    this.geom = null;
 
     this.settings = new (function() {
         this.rotateX = 0;
@@ -18,7 +19,6 @@ proto.onDraw = function(time, dt) {
     //this.camera.position.z += 10*Math.cos(time);
     this.lineGroup.rotation.x = this.settings.rotateX;
     this.lineGroup.rotation.y = this.settings.rotateY;
-
 }
 
 proto.getGui = function() {
@@ -59,12 +59,17 @@ proto.onPreload = function() {
     var offsetStep = 5;
     var offset = -1 * offsetStep * Math.floor(count/2);
     var flipColor = false;
+    var tracer = null;
+    var tcent = null;
     for (var i = 0; i < count; i++) {
         var geometry = new THREE.Geometry()
+        this.geom = geometry;
         //origin.x += 5;
         //origin.y += 5;
         tracer = new F.ArcTracer(origin, size, offset);
         offset += offsetStep;
+        if (offset == 0)
+            tcent = tracer;
         tracer.arc(0,0,90); // can flip either
         tracer.arc(0,1,90); // can only flip +y
         tracer.arc(-1,0,90); // can only flip -x
@@ -89,9 +94,9 @@ proto.onPreload = function() {
 
         // lines
 
-        var line, p, scale = 0.3, d = 10;
+        var line, p, scale = 0.3*5.5, d = 10;
         parameters = []; 
-        parameters.push([ material, scale*5.5, [d,d,0],  geometry ]);
+        parameters.push([ material, scale, [d,d,0],  geometry ]);
 
         for ( k = 0; k < parameters.length; ++k ) {
             p = parameters[k];
@@ -102,7 +107,37 @@ proto.onPreload = function() {
             line.position.z = p[ 2 ][ 2 ];
             this.lineGroup.add(line);
         }
+
+        /*
+        */
+        var geometry = new F.PlanerRibbonGeometry(new THREE.Vector3(0,0,1), 
+                                 tracer.points, 
+                                 [2]);
+
+        var m = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true } );
+        var mesh = new THREE.Mesh(geometry, m);
+        mesh.scale.x = mesh.scale.y = mesh.scale.z = .3*5.5;
+        mesh.position.x = d;
+        mesh.position.y = d;
+        mesh.position.z = 0;
+        this.lineGroup.add( mesh );
     }
+
+    /*
+    var geometry = new F.PlanerRibbonGeometry(new THREE.Vector3(0,0,1), 
+                             tcent.points, 
+                             [20]);
+
+    var material = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true } );
+    var mesh = new THREE.Mesh( geometry, material );
+    mesh.scale.x = mesh.scale.y = mesh.scale.z = .3*5.5;
+    mesh.position.x = d;
+    mesh.position.y = d;
+    mesh.position.z = 0;
+    this.lineGroup.add( mesh );
+    */
+
+
     this.scene.add(this.lineGroup);
 }
 
@@ -125,7 +160,7 @@ F.ArcTracer = function (origin, size, offset) {
     this.t = 0;
 
     this.arc = function (xAdj, yAdj, sweepDeg) {
-        var iterations = 50.0;
+        var iterations = 20.0;
         var sweepRad = sweepDeg * DegToRad; 
         
         if (xAdj != 0) {
@@ -143,7 +178,8 @@ F.ArcTracer = function (origin, size, offset) {
 
         // subtract one to close the circle at angle = 360
         var dtheta = sweepRad / (iterations-1);
-        for (i = 0 ; i < iterations; i++) {
+        var start = this.points.length == 0 ? 0 : 1;
+        for (var i = start; i < iterations; i++) {
             this.t += 1;
             this.points.push(new THREE.Vector3(
                                 this.origin.x + (this.xLoc*2*this.size) + size*Math.cos(this.xAngle+(i*dtheta)), 

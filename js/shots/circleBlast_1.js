@@ -40,7 +40,16 @@ proto.onPreload = function() {
     //
     // Add some geometry
     //
-    var geometry = new THREE.CubeGeometry( 200, 200, 200 );
+//    var geometry = new THREE.CubeGeometry( 200, 200, 200 );
+    var geometry = new F.PlanerRibbonGeometry(new THREE.Vector3(0,0,1), 
+                             [new THREE.Vector3(0,0,0), 
+                              new THREE.Vector3(100,2*100,0), 
+                              new THREE.Vector3(400,2*200,0), 
+                              new THREE.Vector3(900,2*300,0),
+                              new THREE.Vector3(700,2*500,0),
+                              ], 
+                             [200]);
+
     var material = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true } );
     this.mesh = new THREE.Mesh( geometry, material );
     this.scene.add( this.mesh );

@@ -16,7 +16,7 @@ function init() {
     document.body.appendChild( stats.domElement );
 
     renderer = new THREE.WebGLRenderer({
-            antialias               : false,    // to get smoother output
+            antialias               : true,    // to get smoother output
             preserveDrawingBuffer   : true     // to allow screenshot
             });
     renderer.setSize( window.innerWidth, window.innerHeight );
