@@ -16,9 +16,6 @@ F.PlanerRibbonGeometry.prototype = Object.create( THREE.Geometry.prototype );
 F.PlanerRibbonGeometry.prototype.update = function(normal, curveVerts, widths) {
     //new F.PlanerRibbonGeometry(THREE.Vector3(0,0,1), [THREE.Vector3(0,0,0), THREE.Vector3(0,1,0)], [1.0])
 
-    this.buffersNeedUpdate = true;
-    this.verticesNeedUpdate = true;
-
     this.widths = widths;
     this.normal = normal;
     this.vertices = [];
@@ -118,15 +115,12 @@ F.PlanerRibbonGeometry.prototype.update = function(normal, curveVerts, widths) {
         }
     }
 
-    this.buffersNeedUpdate = true;
-    this.verticesNeedUpdate = true;
-
     this.computeCentroids();
 
     this.dynamic = true;
     this.buffersNeedUpdate = true;
     this.verticesNeedUpdate = true;
-}
 
 
+};
 

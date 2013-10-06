@@ -27,6 +27,7 @@ function init() {
     seq = new F.Seq(renderer);
 
     // Time units are ms
+    seq.addShot(new F.Shots.Warp_1(1));
     seq.addShot(new F.Shots.CircleSpline_1(3));
     seq.addShot(new F.Shots.Warp_1(5));
     seq.addShot(new F.Shots.CircleBlast_1(3));
