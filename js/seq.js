@@ -76,6 +76,7 @@ F.Seq.prototype = {
             this.renderer.clear();
             curShot.composer.render();
         } else {
+            this.renderer.clear();
             this.renderer.render( curShot.scene, curShot.camera );
         }
     },
