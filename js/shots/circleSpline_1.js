@@ -51,7 +51,7 @@ proto.onPreload = function() {
     //points = hilbert3D( new THREE.Vector3( 0,0,0 ), 200.0, 2, 0, 1, 2, 3, 4, 5, 6, 7 ),
 
     var points = [];
-    var origin  = new THREE.Vector2(0, -300);
+    var origin  = new THREE.Vector2(100, -400);
     var material = new THREE.LineBasicMaterial( { color: 0xffffff, opacity: 1, linewidth: 3, vertexColors: THREE.VertexColors } );
 
     var count = 70;
