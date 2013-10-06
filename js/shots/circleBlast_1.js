@@ -8,8 +8,17 @@ F.Shots.CircleBlast_1 = function(duration) {
 proto = Object.create(F.Shot.prototype);
 
 proto.onDraw = function(time, dt) {
-    this.mesh.rotation.x += 0.01;
-    this.mesh.rotation.y += 0.02;
+    //this.mesh.rotation.x += 0.01;
+    //this.mesh.rotation.y += 0.02;
+
+    this.mesh.geometry.update(new THREE.Vector3(0,0,1), 
+                             [new THREE.Vector3(0,0,0), 
+                              new THREE.Vector3(this.progress*100,2*100,0), 
+                              new THREE.Vector3(400,2*200,0), 
+                              new THREE.Vector3(900,2*300,0),
+                              new THREE.Vector3(700,2*500,0),
+                              ], 
+                             [this.progress*200]);
 }
 
 proto.getGui = function() {

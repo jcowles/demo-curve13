@@ -25,16 +25,15 @@ proto.onPreload = function() {
 
 	this.composer = new THREE.EffectComposer( renderer );	
 	this.composer.addPass( renderModel );
-	this.composer.addPass( effectBloom );
+	//this.composer.addPass( effectBloom );
 	this.composer.addPass( effectCopy );
 }
 
 proto.onDraw = function(time, dt) {
-
 	renderer.setClearColor(0, 1);
 
 	time = this.progress
-	time = Math.min(1,time*1.5)
+	//time = Math.min(1,time*1.5)
 
     // Lerp curvatures according to time or transition
     for (cIdx=0; cIdx<this.curvatures.length; cIdx++) {
@@ -69,12 +68,12 @@ proto.onDraw = function(time, dt) {
         this.pts[i].add(fracErr);
     }
 
-    // commit new point positions to line geometry
-    for (i=0; i<this.line.geometry.vertices.length; i++) {
-        this.line.geometry.vertices[i].copy(this.pts[i]);
-    }
-    this.line.geometry.verticesNeedUpdate = true;
-
+    // commit new point positions.  Make a new geometry and
+    // update the mesh with it.
+    this.mesh.geometry.update(
+        new THREE.Vector3(0,0,1),
+        this.pts,
+        [0.02]);
 }
 
 proto._initWarp = function() {
@@ -94,16 +93,16 @@ proto._initWarp = function() {
     this.tangents = computeTangents(curveA);
     this.pts = curveA.slice(0);
 
-    geometry = new THREE.Geometry();
-    for (i=0; i<this.pts.length; i++) {
-        geometry.vertices.push(this.pts[i]); 
-    }   
+    var geometry = new F.PlanerRibbonGeometry(
+        new THREE.Vector3(0,0,1),
+        this.pts,
+        [0.02])
 
-    material = new THREE.LineBasicMaterial( { color: 0xff3333, opacity: 1, linewidth: 3} );
+    var material = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true } );
 
-    this.line = new THREE.Line(geometry, material);
-    this.line.scale.x = this.line.scale.y = this.line.scale.z = 500;
-    this.scene.add( this.line );
+    this.mesh = new THREE.Mesh( geometry, material );
+    this.mesh.scale.x = this.mesh.scale.y = 200;
+    this.scene.add( this.mesh );
 
     this.progress = 0;
 }

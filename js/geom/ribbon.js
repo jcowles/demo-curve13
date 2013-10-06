@@ -8,11 +8,22 @@
  */
 F.PlanerRibbonGeometry = function(normal, curveVerts, widths) {
     THREE.Geometry.call(this);
+    this.update(normal, curveVerts, widths);
+};
 
+F.PlanerRibbonGeometry.prototype = Object.create( THREE.Geometry.prototype );
+
+F.PlanerRibbonGeometry.prototype.update = function(normal, curveVerts, widths) {
     //new F.PlanerRibbonGeometry(THREE.Vector3(0,0,1), [THREE.Vector3(0,0,0), THREE.Vector3(0,1,0)], [1.0])
+
+    this.buffersNeedUpdate = true;
+    this.verticesNeedUpdate = true;
 
     this.widths = widths;
     this.normal = normal;
+    this.vertices = [];
+    this.faces = [];
+    this.faceVertexUvs[0] = [];
     
     var width = widths[0];
     var count = 0;
@@ -107,8 +118,15 @@ F.PlanerRibbonGeometry = function(normal, curveVerts, widths) {
         }
     }
 
-    this.computeCentroids();
-};
+    this.buffersNeedUpdate = true;
+    this.verticesNeedUpdate = true;
 
-F.PlanerRibbonGeometry.prototype = Object.create( THREE.Geometry.prototype );
+    this.computeCentroids();
+
+    this.dynamic = true;
+    this.buffersNeedUpdate = true;
+    this.verticesNeedUpdate = true;
+}
+
+
 
