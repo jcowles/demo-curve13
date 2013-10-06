@@ -8,9 +8,6 @@ F.Shots.CircleSpline_1 = function(duration) {
     this.settings = new (function() {
         this.rotateX = 0;
         this.rotateY = 0;
-        this.camX = 0;
-        this.camY = 0;
-        this.camZ = 1000;
         this.hue = .6
     })();
 };
@@ -18,11 +15,10 @@ F.Shots.CircleSpline_1 = function(duration) {
 proto = Object.create(F.Shot.prototype);
 
 proto.onDraw = function(time, dt) {
-    this.camera.position.x = this.settings.camX;
-    this.camera.position.y = this.settings.camY;
-    this.camera.position.z = this.settings.camZ;
-    this.lineGroup.rotation.x = this.settings.rotateX;
-    this.lineGroup.rotation.y = this.settings.rotateY;
+    this.camera.position.x += Math.sin(time);
+    this.camera.position.z += 10*Math.cos(time);
+    this.lineGroup.rotation.x += this.settings.rotateX;
+    this.lineGroup.rotation.y += .05*Math.cos(Math.sin(time)); //this.settings.rotateY;
 }
 
 proto.getGui = function() {
@@ -31,11 +27,8 @@ proto.getGui = function() {
     //
     
     var gui = new dat.GUI();
-    gui.add(this.settings, 'rotateX', -Math.PI, Math.PI);
-    gui.add(this.settings, 'rotateY', -Math.PI, Math.PI);
-    gui.add(this.settings, 'camX', -10000, 10000);
-    gui.add(this.settings, 'camY', -10000, 10000);
-    gui.add(this.settings, 'camZ', -10000, 10000);
+    gui.add(this.settings, 'rotateX', -5, 5);
+    gui.add(this.settings, 'rotateY', -5, 5);
     return gui;
 }
 
@@ -48,10 +41,6 @@ proto.onPreload = function() {
                                 1, 10000 );
     this.camera.position.z = 1000;
     this.scene = new THREE.Scene();
-
-    var dirLight = new THREE.DirectionalLight( 0xffffff, 0.125 );
-    dirLight.position.set( 0, 0, 1 ).normalize();
-    this.scene.add( dirLight );
 
     //
     // Add some geometry
@@ -92,7 +81,7 @@ proto.onPreload = function() {
 
         points = tracer.points;
 
-        var colors = [];
+        colors = [];
 
         for (j = 0; j < points.length; j ++) {
             geometry.vertices.push(points[j]);
@@ -116,29 +105,17 @@ proto.onPreload = function() {
             line.position.x = p[ 2 ][ 0 ];
             line.position.y = p[ 2 ][ 1 ];
             line.position.z = p[ 2 ][ 2 ];
-            //this.lineGroup.add(line);
+            this.lineGroup.add(line);
         }
 
         /*
         */
-        var m = new THREE.MeshBasicMaterial( { opacity: 1.0, 
-                                                color: flipColor ? 0x30D6FF : 0xFFFFFF,
-                                                vertexColors: THREE.VertexColors, 
-                                                } ); //wireframe: true 
-        var geoRibbon = new F.PlanerRibbonGeometry(new THREE.Vector3(0,0,1), 
+        var geometry = new F.PlanerRibbonGeometry(new THREE.Vector3(0,0,1), 
                                  tracer.points, 
-                                 [2.5]);
-        geoRibbon.vertices.forEach(function(vert, j) {
-            color = new THREE.Color( 0xff00ff );
-            //if (flipColor)
-            color.setHSL(0.6, 1.0, 0.5);
-            geoRibbon.colors.push(color)
-        });
-        this.geom = geoRibbon;
+                                 [2]);
 
-        //color: 0xff0000
-        var mesh = new THREE.Mesh(geoRibbon, m);
-        this.m = m;
+        var m = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true } );
+        var mesh = new THREE.Mesh(geometry, m);
         mesh.scale.x = mesh.scale.y = mesh.scale.z = .3*5.5;
         mesh.position.x = d;
         mesh.position.y = d;
@@ -183,7 +160,7 @@ F.ArcTracer = function (origin, size, offset) {
     this.t = 0;
 
     this.arc = function (xAdj, yAdj, sweepDeg) {
-        var iterations = 10.0;
+        var iterations = 20.0;
         var sweepRad = sweepDeg * DegToRad; 
         
         if (xAdj != 0) {
