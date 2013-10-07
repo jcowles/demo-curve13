@@ -4,9 +4,9 @@ F.Shots.Warp_2 = function(duration, filenameA, filenameB) {
     F.Shot.call(this, "Warp_2", duration);
 
     this.settings = new (function() {
-        this.sinAmp = 0.2;
-        this.sinFrq = 76;
-        this.sinPhv = 12;
+        this.sinAmp = 0.01;
+        this.sinFrq = 21;
+        this.sinPhv = 3;
     })();
 
 };
@@ -30,11 +30,11 @@ proto.onPreload = function() {
     this.camera = new THREE.PerspectiveCamera( 75, 
                                 window.innerWidth / window.innerHeight, 
                                 1, 10000 );
-    this.camera.position.z = 1000;
+    this.camera.position.z = 2;
 
     //////////////////////
 
-    this.warpSeries = new F.WarpSeries(this.camera, [CURVE_STAR, CURVE_BABE, CURVE_STAR]);
+    this.warpSeries = new F.WarpSeries(this.camera, [CURVE_STAR, CURVE_STAR, CURVE_BABE, CURVE_BABE, CURVE_STAR]);
 
     this.warpSeries.settings = this.settings;
 

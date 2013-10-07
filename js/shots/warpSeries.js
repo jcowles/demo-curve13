@@ -74,8 +74,8 @@ proto.setColor = function(color) {
 proto.setTime = function(time) {
 
     // Find the 2 curvature sets that represent the nearby shapes.
-    time = Math.min(Math.max(0,time), 1);
-    var floatIdx = time * (this.curvesList.length-1);
+    var clampedTime = Math.min(Math.max(0,time), 1);
+    var floatIdx = clampedTime * (this.curvesList.length-1);
     var curveAIdx = Math.floor(floatIdx);
     var curveBIdx = Math.min(curveAIdx+1, this.curvesList.length-1);
     var fracIdx = floatIdx - curveAIdx;
@@ -124,36 +124,43 @@ proto.setTime = function(time) {
         this.pts[i].add(fracErr);
     }
 
+    // Rebuild point positions from tangents
+    var centroid = new THREE.Vector3();
+    for (var pIdx=0; pIdx<this.pts.length; pIdx++) {
+        centroid.add(this.pts[pIdx]);
+    }
+    centroid.multiplyScalar(1.0/this.pts.length);
+
     // Consider new point positions and rotate them about p0 so that
-    // edge 0 matches the desired orientation.  This accounts for
+    // p0 -> p(n/2) matches the desired orientation.  This accounts for
     // the arbitrary rotations that arbitrary curvature operations cause.
     var currentAngle = computeBaseAngle(this.pts);
     var desiredAngle = (1-time)*this.restAngles[curveAIdx] + time*this.restAngles[curveBIdx];
 
+    var centroidToOrigin = new THREE.Matrix4();
+    centroidToOrigin.makeTranslation(-centroid.x, -centroid.y, -centroid.z);
     var originRotMat = new THREE.Matrix4();
     originRotMat.makeRotationZ(desiredAngle - currentAngle);
     var toOrigin = new THREE.Matrix4();
-    toOrigin.makeTranslation(this.pts[0].x, this.pts[0].y, this.pts[0].z);
+    toOrigin.makeTranslation(-this.pts[0].x, -this.pts[0].y, -this.pts[0].z);
     var fromOrigin = new THREE.Matrix4();
-    fromOrigin.makeTranslation(-this.pts[0].x, -this.pts[0].y, -this.pts[0].z);
+    fromOrigin.makeTranslation(this.pts[0].x, this.pts[0].y, this.pts[0].z);
 
     var fixMat = new THREE.Matrix4();
-    fixMat.multiply(toOrigin);
-    fixMat.multiply(originRotMat);
     fixMat.multiply(fromOrigin);
+    fixMat.multiply(originRotMat);
+    fixMat.multiply(toOrigin);
+    fixMat.multiply(centroidToOrigin);
 
     // XXX TODO wtf r u kidding me
     this.meshWhite.matrix.identity();
     this.meshWhite.applyMatrix(fixMat);
-    this.meshWhite.scale.x = 400;
-    this.meshWhite.scale.y = 400;
     this.meshWhite.matrixWorldNeedsUpdate = true;
+
     this.meshColored.matrix.identity();
     this.meshColored.applyMatrix(fixMat);
-    this.meshColored.scale.x = 400;
-    this.meshColored.scale.y = 400;
     this.meshColored.matrixWorldNeedsUpdate = true;
-    
+
     // commit new point positions
     this.geometry.update(
         new THREE.Vector3(0,0,1),
@@ -229,7 +236,7 @@ function computeCurvatures(pts) {
 
 function computeBaseAngle(pts) {
     var t = new THREE.Vector3();
-    t.subVectors(pts[25], pts[0]);
+    t.subVectors(pts[Math.floor((pts.length-1)/2)], pts[0]);
     t.normalize();
     return Math.atan2(t.y, t.x);
 }
