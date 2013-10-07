@@ -9,6 +9,7 @@ F.Shots.CircleSpline_1 = function(duration) {
     this.ribbons = [];
     this.origin  = new THREE.Vector2(100, -400);
     this.size = 200;
+    this.tracer = new F.ArcTracer();
 
     this.settings = new (function() {
         this.rotateX = 0;
@@ -33,15 +34,16 @@ proto.onDraw = function(time, dt) {
 
     var me = this;
     time = time*100;
+    var normal = new THREE.Vector3(0,0,1);
     this.ribbons.forEach(function(ribbonMesh, index) {
-        var tracer = new F.ArcTracer(me.origin, me.size, ribbonMesh.ribbonOffset);
-        tracer.iterations = 5;
+        me.tracer.reset(me.origin, me.size, ribbonMesh.ribbonOffset)
+        me.tracer.iterations = 20;
         t = time - ribbonMesh.ribbonOffset;
-
-        arcDriver(tracer, t);
+        if (t < 0) t = 0.1;
+        arcDriver(me.tracer, t);
         
-        ribbonMesh.geometry.update(new THREE.Vector3(0,0,1), 
-                                 tracer.points, 
+        ribbonMesh.geometry.update(normal, 
+                                 me.tracer.points, 
                                  [2.8]);
 
     });
@@ -63,12 +65,12 @@ function arcDriver(tracer, angle) {
     var state = { lock: false,
               angle: angle };
 
-    state = foo(tracer,0,0,90,state);
-    state = foo(tracer,0,1,90,state);
-    state = foo(tracer,-1,0,90,state);
-    state = foo(tracer,0,0,90,state);
-    state = foo(tracer,0,0,90,state);
-    state = foo(tracer,0,-1,90,state);
+    foo(tracer,0,0,90,state);
+    foo(tracer,0,1,90,state);
+    foo(tracer,-1,0,90,state);
+    foo(tracer,0,0,90,state);
+    foo(tracer,0,0,90,state);
+    foo(tracer,0,-1,90,state);
 }
 
 
@@ -176,16 +178,22 @@ delete proto;
 var DegToRad = (Math.PI/180);
 
 F.ArcTracer = function (origin, size, offset) {
-    this.origin = origin; 
-    this.size = size;
-    this.offset = offset;
-    this.xLoc = 0;
-    this.yLoc = 0;
-    this.xAngle = 0;
-    this.yAngle = 0;
-    this.points = [];
-    this.t = 0;
-    this.iterations = 3;
+
+    this.reset = function(origin, size, offset) {
+        this.origin = origin; 
+        this.size = size;
+        this.offset = offset;
+        this.xLoc = 0;
+        this.yLoc = 0;
+        this.xAngle = 0;
+        this.yAngle = 0;
+        this.points = [];
+        this.t = 0;
+        this.iterations = 3;
+    };
+
+
+    this.reset(origin, size, offset);
 
     this.arc = function (xAdj, yAdj, sweepDeg, lock) {
         lock = lock || false;
