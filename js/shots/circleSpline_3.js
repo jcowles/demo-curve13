@@ -12,8 +12,8 @@ F.Shots.CircleSpline_1 = function(duration) {
     this.settings = new (function() {
         this.rotateX = 0;
         this.rotateY = 0;
-        this.camX = 130;
-        this.camY = -240;
+        this.camX = 0;
+        this.camY = 0;
         this.camZ = 1000;
         this.hue = .6
     })();
@@ -21,31 +21,15 @@ F.Shots.CircleSpline_1 = function(duration) {
 
 proto = Object.create(F.Shot.prototype);
 
-function foo(tracer, a, b, max, state) {
-    if (state.angle < max) {
-        tracer.arc(a,b,state.angle,state.lock);
-        state.lock = true;
-    } else {
-        tracer.arc(a,b,max,state.lock);
-        state.angle -= max;
-    }
-    return state;
-}
-
 function arcDriver(tracer, angle) {
-    var state = { lock: false,
-              angle: angle };
-
-    state = foo(tracer,0,0,90,state);
-    state = foo(tracer,0,1,90,state);
-    state = foo(tracer,-1,0,90,state);
-    state = foo(tracer,0,0,90,state);
-    state = foo(tracer,0,0,90,state);
-    state = foo(tracer,0,-1,90,state);
+    tracer.arc(0,0,time*10); // can flip either
+    tracer.arc(0,1,90); // can only flip +y
+    tracer.arc(-1,0,90); // can only flip -x
+    tracer.arc(0,0,90); // can only flip y
+    tracer.arc(0,0,90); // can only flip x
+    tracer.arc(0,-1,90); // can only flip x
 }
 
-stop = 0
-stop2 = 0
 proto.onDraw = function(time, dt) {
     this.camera.position.x = this.settings.camX;
     this.camera.position.y = this.settings.camY;
@@ -54,40 +38,28 @@ proto.onDraw = function(time, dt) {
     this.lineGroup.rotation.y = this.settings.rotateY;
 
     var tracer = new F.ArcTracer(this.origin, this.size, 0);
-    tracer.iterations = 20;
-
+    tracer.iterations = 30;
+    tracer.arc(0,0,time*100); // can flip either
     /*
-    if (stop2)
-        return;
-    if (stop) {
-        stop2 = true;
-        time = -33;
-    }
-    time += 99.99;
-    //time = 90.0001
-    stop = time > 90.2;
-    
-    log(time);
-    */
-    time = time*100;
-    arcDriver(tracer, time);
-    
-    //arcDriver(tracer, (time+8.9)*10);
-    //log(tracer.points);
-    
-    /*
-    tracer.arc(0,0,90); // can flip either
     tracer.arc(0,1,90); // can only flip +y
     tracer.arc(-1,0,90); // can only flip -x
     tracer.arc(0,0,90); // can only flip y
     tracer.arc(0,0,90); // can only flip x
-    tracer.arc(0,-1,90+time*20); // can only flip x
+    tracer.arc(0,-1,90); // can only flip x
     */
 
     this.geom.update(new THREE.Vector3(0,0,1), 
                              tracer.points, 
-                             [35]);
-                             //[2.5]);
+                             [2.5]);
+    /*
+    var geoRibbon = new F.PlanerRibbonGeometry(new THREE.Vector3(0,0,1), 
+                             tracer.points, 
+                             [2.5]);
+
+    this.geom = geoRibbon;
+    this.ribbon.setGeometry(geoRibbon);
+    this.geom.buffersNeedUpdate = true;
+    */
 }
 
 proto.getGui = function() {
@@ -149,8 +121,7 @@ proto.onPreload = function() {
         var mat = new THREE.MeshBasicMaterial( { opacity: 1.0, 
                                                 color: flipColor ? 0x30D6FF : 0xFFFFFF,
                                                 //vertexColors: THREE.VertexColors, 
-                                                //wireframe: true 
-                                                } ); 
+                                                } ); //wireframe: true 
 
         var geoRibbon = new F.PlanerRibbonGeometry(new THREE.Vector3(0,0,1), 
                                  tracer.points, 
@@ -200,25 +171,9 @@ F.ArcTracer = function (origin, size, offset) {
     this.yAngle = 0;
     this.points = [];
     this.t = 0;
-    this.iterations = 3;
+    this.iterations = 10;
 
-    this.arc = function (xAdj, yAdj, sweepDeg, lock) {
-        lock = lock || false;
-        var start = this.points.length == 0 ? 0 : 1;
-
-        if (lock) {
-            if (this.points.length == 0) {
-                console.error("Unable to lock with zero points!");
-            }
-            // lock all generated verts to the last generated vertex
-            var point = this.points[this.points.length-1];
-            for (var i = start; i < this.iterations; i++) {
-                this.points.push(point);
-            }
-            return;
-        }
-
-        //log(sweepDeg);
+    this.arc = function (xAdj, yAdj, sweepDeg) {
         var sweepRad = sweepDeg * DegToRad; 
         
         if (xAdj != 0) {
@@ -236,21 +191,46 @@ F.ArcTracer = function (origin, size, offset) {
 
         // subtract one to close the circle at angle = 360
         var dtheta = sweepRad / (this.iterations-1);
-
+        var start = this.points.length == 0 ? 0 : 1;
         for (var i = start; i < this.iterations; i++) {
             this.t += 1;
-            var nextPoint = new THREE.Vector3(
+            this.points.push(new THREE.Vector3(
                                 this.origin.x + (this.xLoc*2*this.size) + size*Math.cos(this.xAngle+(i*dtheta)), 
                                 this.origin.y + (this.yLoc*2*this.size) + size*Math.sin(this.yAngle+(i*dtheta)), 
-                                10);
-                                //10-(this.t/100));
-            this.points.push(nextPoint);
+                                10-(this.t/100)));
         }
-
-        //log(this.points[this.points.length-1])
 
         this.xAngle += sweepRad;
         this.yAngle += sweepRad;
     }
 };
+
+function hilbert3D( center, side, iterations, v0, v1, v2, v3, v4, v5, v6, v7 ) {
+    var half = side / 2,
+            vec_s = [
+            new THREE.Vector3( center.x - half, center.y + half, center.z - half ),
+            new THREE.Vector3( center.x - half, center.y + half, center.z + half ),
+            new THREE.Vector3( center.x - half, center.y - half, center.z + half ),
+            new THREE.Vector3( center.x - half, center.y - half, center.z - half ),
+            new THREE.Vector3( center.x + half, center.y - half, center.z - half ),
+            new THREE.Vector3( center.x + half, center.y - half, center.z + half ),
+            new THREE.Vector3( center.x + half, center.y + half, center.z + half ),
+            new THREE.Vector3( center.x + half, center.y + half, center.z - half )
+            ],
+            vec = [ vec_s[ v0 ], vec_s[ v1 ], vec_s[ v2 ], vec_s[ v3 ], vec_s[ v4 ], vec_s[ v5 ], vec_s[ v6 ], vec_s[ v7 ] ];
+
+    if( --iterations >= 0 ) {
+        var tmp = [];
+        Array.prototype.push.apply( tmp, hilbert3D ( vec[ 0 ], half, iterations, v0, v3, v4, v7, v6, v5, v2, v1 ) );
+        Array.prototype.push.apply( tmp, hilbert3D ( vec[ 1 ], half, iterations, v0, v7, v6, v1, v2, v5, v4, v3 ) );
+        Array.prototype.push.apply( tmp, hilbert3D ( vec[ 2 ], half, iterations, v0, v7, v6, v1, v2, v5, v4, v3 ) );
+        Array.prototype.push.apply( tmp, hilbert3D ( vec[ 3 ], half, iterations, v2, v3, v0, v1, v6, v7, v4, v5 ) );
+        Array.prototype.push.apply( tmp, hilbert3D ( vec[ 4 ], half, iterations, v2, v3, v0, v1, v6, v7, v4, v5 ) );
+        Array.prototype.push.apply( tmp, hilbert3D ( vec[ 5 ], half, iterations, v4, v3, v2, v5, v6, v1, v0, v7 ) );
+        Array.prototype.push.apply( tmp, hilbert3D ( vec[ 6 ], half, iterations, v4, v3, v2, v5, v6, v1, v0, v7 ) );
+        Array.prototype.push.apply( tmp, hilbert3D ( vec[ 7 ], half, iterations, v6, v5, v2, v1, v0, v3, v4, v7 ) );
+        return tmp;
+    }
+    return vec;
+}
 

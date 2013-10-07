@@ -14,13 +14,19 @@ F.PlanerRibbonGeometry = function(normal, curveVerts, widths) {
 F.PlanerRibbonGeometry.prototype = Object.create( THREE.Geometry.prototype );
 
 F.PlanerRibbonGeometry.prototype.update = function(normal, curveVerts, widths) {
-    //new F.PlanerRibbonGeometry(THREE.Vector3(0,0,1), [THREE.Vector3(0,0,0), THREE.Vector3(0,1,0)], [1.0])
-
+    this.dynamic = true;
     this.buffersNeedUpdate = true;
     this.verticesNeedUpdate = true;
+    this.elementsNeedUpdate = true;
+    this.colorsNeedUpdate = true;
+    this.uvsNeedUpdate = true;
+    this.normalsNeedUpdate = true;
+    this.tangentsNeedUpdate = true;
+    this.lineDistancesNeedUpdate = true;
 
     this.widths = widths;
     this.normal = normal;
+
     this.vertices = [];
     this.faces = [];
     this.faceVertexUvs[0] = [];
@@ -28,12 +34,10 @@ F.PlanerRibbonGeometry.prototype.update = function(normal, curveVerts, widths) {
     var width = widths[0];
     var count = 0;
 
-    //
-    // TODO: INCLUDE THE LAST QUAD PATCH
-    //
-
     var start = 1//4;
     var end = curveVerts.length - 1;//24 
+    var lastGoodCotangent = null;
+
     for(var index = start; index <= end; index++) {
         var vert = curveVerts[index].clone();
         //vert.z = 0;
@@ -52,6 +56,10 @@ F.PlanerRibbonGeometry.prototype.update = function(normal, curveVerts, widths) {
         // construct an ortho-normal basis using the normal and the tangent
         var cotangent1 = new THREE.Vector3();
         cotangent1.crossVectors(normal, tangent);
+        if (cotangent1.length() < .0001) {
+            cotangent1 = lastGoodCotangent.clone();
+        }
+        lastGoodCotangent = cotangent1.clone(); 
         var cotangentOrig = cotangent1.clone();
         var cotangent2 = cotangent1.clone();
 
@@ -118,14 +126,7 @@ F.PlanerRibbonGeometry.prototype.update = function(normal, curveVerts, widths) {
         }
     }
 
-    this.buffersNeedUpdate = true;
-    this.verticesNeedUpdate = true;
-
     this.computeCentroids();
-
-    this.dynamic = true;
-    this.buffersNeedUpdate = true;
-    this.verticesNeedUpdate = true;
 }
 
 
