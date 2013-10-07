@@ -127,7 +127,6 @@ F.PlanerRibbonGeometry.prototype.update = function(normal, curveVerts, widths) {
     }
 
     this.computeCentroids();
-}
 
-
+};
 
