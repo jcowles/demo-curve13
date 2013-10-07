@@ -2,9 +2,28 @@
 
 F.Shots.Warp_1 = function(duration, filenameA, filenameB) {
     F.Shot.call(this, "Warp_1", duration);
+
+    this.settings = new (function() {
+        this.sinAmp = 0.2;
+        this.sinFrq = 76;
+        this.sinPhv = 12;
+    })();
+
 };
 
 proto = Object.create(F.Shot.prototype);
+
+proto.getGui = function() {
+    //
+    // GUI Init
+    //
+    
+    var gui = new dat.GUI();
+    gui.add(this.settings, 'sinAmp', 0, 0.2);
+    gui.add(this.settings, 'sinFrq', 0, 160);
+    gui.add(this.settings, 'sinPhv', 0, 160);
+    return gui;
+}
 
 proto.onPreload = function() {
 
@@ -85,8 +104,11 @@ proto.onDraw = function(time, dt) {
 
     // Add some stressful perturbations
     for (cIdx=0; cIdx<this.curvatures.length; cIdx++) {
-        this.curvatures[cIdx] += 0.2*Math.sin(this.progress*20 + cIdx/(this.curvatures.length-1.0)*75*2*Math.PI)
-    }    
+        this.curvatures[cIdx] += 
+            this.settings.sinAmp * Math.sin( 
+            this.settings.sinPhv*this.progress + cIdx/(this.curvatures.length-1.0) 
+            *this.settings.sinFrq*2*Math.PI);
+    }
 
     // Rebuild tangents from curvatures
     for (tIdx=1; tIdx<this.tangents.length; tIdx++) {
