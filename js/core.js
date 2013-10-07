@@ -27,12 +27,18 @@ function init() {
     seq = new F.Seq(renderer);
 
     // Time units are ms
-    seq.addShot(new F.Shots.Warp_2(3));
-    seq.addShot(new F.Shots.CircleSpline_1(3));
+    //seq.addShot(new F.Shots.Warp_2(3));
+    seq.addShot(new F.Shots.CircleSpline_1(5));
     seq.addShot(new F.Shots.Warp_2(5));
-    seq.addShot(new F.Shots.CircleBlast_1(3));
-    seq.addShot(new F.Shots.Warp_2(4));
-    seq.addShot(new F.Shots.CircleBlast_1(5));
+    seq.addShot(new F.Shots.CircleSpline_5(2));
+    seq.addShot(new F.Shots.Warp_2(2));
+    seq.addShot(new F.Shots.CircleSpline_3(10));
+    seq.addShot(new F.Shots.Warp_2(2));
+    seq.addShot(new F.Shots.CircleSpline_4(4));
+    seq.addShot(new F.Shots.Warp_2(2));
+    seq.addShot(new F.Shots.CircleSpline_2(5));
+    seq.addShot(new F.Shots.Warp_2(2));
+    seq.addShot(new F.Shots.CircleSpline_1(5));
 
     seq.preload();
     seq.play();

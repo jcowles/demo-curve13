@@ -53,7 +53,7 @@ F.PlanerRibbonGeometry.prototype.update = function(normal, curveVerts, widths, i
         // construct an ortho-normal basis using the normal and the tangent
         var cotangent1 = new THREE.Vector3();
         cotangent1.crossVectors(normal, tangent);
-        if (cotangent1.length() < .0001) {
+        if (lastGoodCotangent && cotangent1.length() < .0001) {
             cotangent1 = lastGoodCotangent.clone();
         }
         lastGoodCotangent = cotangent1.clone(); 

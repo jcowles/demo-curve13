@@ -38,8 +38,8 @@ proto.onDraw = function(time, dt) {
     this.ribbons.forEach(function(ribbonMesh, index) {
         me.tracer.reset(me.origin, me.size, ribbonMesh.ribbonOffset)
         me.tracer.iterations = 20;
-        t = time - ribbonMesh.ribbonOffset;
-        if (t < 0) t = 0.1;
+        t = (time - ribbonMesh.ribbonOffset) + Math.sin(me.progress * 2*Math.PI) * 100;
+        if (t < 0) t = 0.001;
         arcDriver(me.tracer, t);
         
         ribbonMesh.geometry.update(normal, 
@@ -137,7 +137,7 @@ proto.onPreload = function() {
 
         var geoRibbon = new F.PlanerRibbonGeometry(new THREE.Vector3(0,0,1), 
                                  tracer.points, 
-                                 [2.5]);
+                                 [2.8]);
         /*
         geoRibbon.vertices.forEach(function(vert, j) {
             color = new THREE.Color( 0xff00ff );

@@ -1,7 +1,7 @@
 // The Shots class is declared in shot.js
 
-F.Shots.CircleSpline_1 = function(duration) {
-    F.Shot.call(this, "CircleSpline_1", duration);
+F.Shots.CircleSpline_2 = function(duration) {
+    F.Shot.call(this, "CircleSpline_2", duration);
     this.lineGroup = null;
     this.geom = null;
 
@@ -141,7 +141,7 @@ proto.onPreload = function() {
     this.scene.add(this.lineGroup);
 }
 
-F.Shots.CircleSpline_1.prototype = proto;
+F.Shots.CircleSpline_2.prototype = proto;
 delete proto;
 
 

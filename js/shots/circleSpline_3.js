@@ -1,7 +1,7 @@
 // The Shots class is declared in shot.js
 
-F.Shots.CircleSpline_1 = function(duration) {
-    F.Shot.call(this, "CircleSpline_1", duration);
+F.Shots.CircleSpline_3 = function(duration) {
+    F.Shot.call(this, "CircleSpline_3", duration);
     this.lineGroup = null;
     this.geom = null;
     this.mat = null;
@@ -12,8 +12,8 @@ F.Shots.CircleSpline_1 = function(duration) {
     this.settings = new (function() {
         this.rotateX = 0;
         this.rotateY = 0;
-        this.camX = 0;
-        this.camY = 0;
+        this.camX = 170;
+        this.camY = -650;
         this.camZ = 1000;
         this.hue = .6
     })();
@@ -39,7 +39,7 @@ proto.onDraw = function(time, dt) {
 
     var tracer = new F.ArcTracer(this.origin, this.size, 0);
     tracer.iterations = 30;
-    tracer.arc(0,0,time*100); // can flip either
+    tracer.arc(0,0,this.progress*6000); // can flip either
     /*
     tracer.arc(0,1,90); // can only flip +y
     tracer.arc(-1,0,90); // can only flip -x
@@ -50,11 +50,11 @@ proto.onDraw = function(time, dt) {
 
     this.geom.update(new THREE.Vector3(0,0,1), 
                              tracer.points, 
-                             [2.5]);
+                             [2.8]);
     /*
     var geoRibbon = new F.PlanerRibbonGeometry(new THREE.Vector3(0,0,1), 
                              tracer.points, 
-                             [2.5]);
+                             [2.8]);
 
     this.geom = geoRibbon;
     this.ribbon.setGeometry(geoRibbon);
@@ -125,7 +125,7 @@ proto.onPreload = function() {
 
         var geoRibbon = new F.PlanerRibbonGeometry(new THREE.Vector3(0,0,1), 
                                  tracer.points, 
-                                 [2.5]);
+                                 [2.8]);
         /*
         geoRibbon.vertices.forEach(function(vert, j) {
             color = new THREE.Color( 0xff00ff );
@@ -154,7 +154,7 @@ proto.onPreload = function() {
     this.scene.add(this.lineGroup);
 }
 
-F.Shots.CircleSpline_1.prototype = proto;
+F.Shots.CircleSpline_3.prototype = proto;
 delete proto;
 
 

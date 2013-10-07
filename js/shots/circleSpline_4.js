@@ -1,7 +1,7 @@
 // The Shots class is declared in shot.js
 
-F.Shots.CircleSpline_1 = function(duration) {
-    F.Shot.call(this, "CircleSpline_1", duration);
+F.Shots.CircleSpline_4 = function(duration) {
+    F.Shot.call(this, "CircleSpline_4", duration);
     this.lineGroup = null;
     this.geom = null;
     this.mat = null;
@@ -32,17 +32,21 @@ proto.onDraw = function(time, dt) {
     this.lineGroup.rotation.y = this.settings.rotateY;
 
     var me = this;
-    time = time*100;
+    var t = this.progress * 90*9;
     this.ribbons.forEach(function(ribbonMesh, index) {
         var tracer = new F.ArcTracer(me.origin, me.size, ribbonMesh.ribbonOffset);
-        tracer.iterations = 5;
-        t = time - ribbonMesh.ribbonOffset;
+        tracer.iterations = 3;
+        var ti = t - ribbonMesh.ribbonOffset + Math.cos(time*2)*90;
+        if (ti < 0)
+            ti = 0;
+        if (ti == 0)
+            ti = .001;
 
-        arcDriver(tracer, t);
+        arcDriver(tracer, ti);
         
         ribbonMesh.geometry.update(new THREE.Vector3(0,0,1), 
                                  tracer.points, 
-                                 [2.8]);
+                                 [1]);
 
     });
 
@@ -135,7 +139,7 @@ proto.onPreload = function() {
 
         var geoRibbon = new F.PlanerRibbonGeometry(new THREE.Vector3(0,0,1), 
                                  tracer.points, 
-                                 [2.5]);
+                                 [2.8]);
         /*
         geoRibbon.vertices.forEach(function(vert, j) {
             color = new THREE.Color( 0xff00ff );
@@ -168,7 +172,7 @@ proto.onPreload = function() {
     this.scene.add(this.lineGroup);
 }
 
-F.Shots.CircleSpline_1.prototype = proto;
+F.Shots.CircleSpline_4.prototype = proto;
 delete proto;
 
 
