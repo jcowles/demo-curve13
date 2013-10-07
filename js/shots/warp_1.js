@@ -80,6 +80,11 @@ proto.onDraw = function(time, dt) {
         this.curvatures[cIdx] = (1-time)*this.curvaturesA[cIdx] + time*this.curvaturesB[cIdx];
     }
 
+    // Add some stressful perturbations
+    for (cIdx=0; cIdx<this.curvatures.length; cIdx++) {
+        this.curvatures[cIdx] += 0.2*Math.sin(this.progress*20 + cIdx/(this.curvatures.length-1.0)*75*2*Math.PI)
+    }    
+
     // Rebuild tangents from curvatures
     for (tIdx=1; tIdx<this.tangents.length; tIdx++) {
         angle = this.curvatures[tIdx];
