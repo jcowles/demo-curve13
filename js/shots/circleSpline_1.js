@@ -12,11 +12,11 @@ F.Shots.CircleSpline_1 = function(duration) {
     this.tracer = new F.ArcTracer();
 
     this.settings = new (function() {
-        this.rotateX = 0;
-        this.rotateY = 0;
-        this.camX = -246;
-        this.camY = -30;
-        this.camZ = 1000;
+        this.rotateX = -.5;
+        this.rotateY = 0.0;
+        this.camX = 0;
+        this.camY = -300;
+        this.camZ = 800;
         this.hue = .6
     })();
 };
@@ -24,15 +24,17 @@ F.Shots.CircleSpline_1 = function(duration) {
 proto = Object.create(F.Shot.prototype);
 
 proto.onDraw = function(time, dt) {
+    var me = this;
     renderer.setClearColor(0, 1);
 
     this.camera.position.x = this.settings.camX;
     this.camera.position.y = this.settings.camY;
     this.camera.position.z = this.settings.camZ;
-    this.lineGroup.rotation.x = this.settings.rotateX;
-    this.lineGroup.rotation.y = this.settings.rotateY;
 
-    var me = this;
+    this.lineGroup.rotation.x = -(this.progress - .1); //this.settings.rotateX;
+    this.lineGroup.rotation.y = this.settings.rotateY;
+    this.lineGroup.rotation.z = Math.sin(this.progress * Math.PI); //this.progress*4;
+
     time = this.progress*90*8;
     var normal = new THREE.Vector3(0,0,1);
     this.ribbons.forEach(function(ribbonMesh, index) {
@@ -47,6 +49,9 @@ proto.onDraw = function(time, dt) {
                                  [2.8]);
 
     });
+    var lastVert = this.ribbon.geometry.vertices[this.ribbon.geometry.vertices.length-1];
+    //this.camera.position.x = lastVert.x;
+    //this.camera.position.y = lastVert.y;
 
 }
 
