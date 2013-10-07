@@ -85,7 +85,7 @@ proto.onDraw = function(time, dt) {
 
     // Add some stressful perturbations
     for (cIdx=0; cIdx<this.curvatures.length; cIdx++) {
-        this.curvatures[cIdx] += 0.4*Math.sin(this.progress*40 + cIdx/(this.curvatures.length-1.0)*75*2*Math.PI)
+        this.curvatures[cIdx] += 0.2*Math.sin(this.progress*20 + cIdx/(this.curvatures.length-1.0)*75*2*Math.PI)
     }    
 
     // Rebuild tangents from curvatures
@@ -120,7 +120,7 @@ proto.onDraw = function(time, dt) {
     // edge 0 matches the desired orientation.  This accounts for
     // the arbitrary rotations that arbitrary curvature operations cause.
     var currentAngle = computeBaseAngle(this.pts);
-    var desiredAngle = this.restAngleB;//(1-time)*this.restAngleA + time*this.restAngleB;
+    var desiredAngle = (1-time)*this.restAngleA + time*this.restAngleB;
 
     var originRotMat = new THREE.Matrix4();
     originRotMat.makeRotationZ(desiredAngle - currentAngle);
@@ -134,10 +134,17 @@ proto.onDraw = function(time, dt) {
     fixMat.multiply(originRotMat);
     fixMat.multiply(fromOrigin);
 
-    // XXX wtf this is unnecessarily inefficient
-    for (i=0; i<this.pts.length; i++) {
-        this.pts[i].applyMatrix4(fixMat);
-    }
+    // XXX TODO wtf r u kidding me
+    this.meshWhite.matrix.identity();
+    this.meshWhite.applyMatrix(fixMat);
+    this.meshWhite.scale.x = 400;
+    this.meshWhite.scale.y = 400;
+    this.meshWhite.matrixWorldNeedsUpdate = true;
+    this.meshColored.matrix.identity();
+    this.meshColored.applyMatrix(fixMat);
+    this.meshColored.scale.x = 400;
+    this.meshColored.scale.y = 400;
+    this.meshColored.matrixWorldNeedsUpdate = true;
 
     // commit new point positions
     this.geometry.update(
