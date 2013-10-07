@@ -33,7 +33,7 @@ proto.onDraw = function(time, dt) {
     this.lineGroup.rotation.y = this.settings.rotateY;
 
     var me = this;
-    time = time*100;
+    time = this.progress*90*8;
     var normal = new THREE.Vector3(0,0,1);
     this.ribbons.forEach(function(ribbonMesh, index) {
         me.tracer.reset(me.origin, me.size, ribbonMesh.ribbonOffset)
