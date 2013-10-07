@@ -64,7 +64,6 @@ proto = Object.create(F.WarpSeries.prototype);
 
 proto.setColor = function(color) {
     this.meshColored.material.color.copy(color);
-    log(this.meshColored.material.color);
     this.meshColored.material.needsUpdate = true;
 }
 
