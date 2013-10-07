@@ -1,22 +1,26 @@
-F.WarpSeries = function(camera, curveList) {
+F.WarpSeries = function(camera, curvesList) {
 
     this.camera = camera;
-    this.curveList = curveList;
+    this.curvesList = curvesList;
+    this.curvaturesList = [];
+    this.restAngles = [];
 
-    var curveA = this.curveList[0];
-    var curveB = this.curveList[1];
+    for (var i=0; i<this.curvesList.length; i++) {
+        c = this.curvesList[i];
+        this.curvaturesList.push(computeCurvatures(c));
+        this.restAngles.push(computeBaseAngle(c));
+    }
 
-    this.curvaturesA = computeCurvatures(curveA);
-    this.curvaturesB = computeCurvatures(curveB);
-
-    this.restAngleA = computeBaseAngle(curveA);
-    this.restAngleB = computeBaseAngle(curveB);
-
-    this.curvatures = computeCurvatures(curveA);
-    this.tangents = computeTangents(curveA);
-    this.pts = curveA.slice(0);
+    // Init the "current" arrays with the first curve.
+    this.curvatures = computeCurvatures(this.curvesList[0]);
+    this.tangents = computeTangents(this.curvesList[0]);
+    this.pts = this.curvesList[0].slice(0);
 
     //////////////////////
+
+    // Set up two scenes, with 2 distinct meshes, each mesh sharing the same geometry
+    // but different material.
+    // XXX TODO Replace this with usage of render pass's overrideMaterial.
 
     this.sceneColored = new THREE.Scene();
     this.sceneWhite = new THREE.Scene();
@@ -69,21 +73,32 @@ proto.setColor = function(color) {
 
 proto.setTime = function(time) {
 
-    // Lerp curvatures according to time or transition
-    for (cIdx=0; cIdx<this.curvatures.length; cIdx++) {
-        this.curvatures[cIdx] = (1-time)*this.curvaturesA[cIdx] + time*this.curvaturesB[cIdx];
+    // Find the 2 curvature sets that represent the nearby shapes.
+    var clampedTime = Math.min(Math.max(0,time), 1);
+    var floatIdx = clampedTime * (this.curvesList.length-1);
+    var curveAIdx = Math.floor(floatIdx);
+    var curveBIdx = Math.min(curveAIdx+1, this.curvesList.length-1);
+    var fracIdx = floatIdx - curveAIdx;
+    fracIdx = smoothStep(fracIdx);
+
+    //log(this.curvaturesList.length + " " + curveAIdx + " " + curveBIdx + " " + fracIdx);
+
+    // Lerp curvatures according to time
+    for (var cIdx=0; cIdx<this.curvatures.length; cIdx++) {
+        this.curvatures[cIdx] = (1-fracIdx)*this.curvaturesList[curveAIdx][cIdx]
+                                  + fracIdx*this.curvaturesList[curveBIdx][cIdx];
     }
 
     // Add some stressful perturbations
-    for (cIdx=0; cIdx<this.curvatures.length; cIdx++) {
+    for (var cIdx=0; cIdx<this.curvatures.length; cIdx++) {
         this.curvatures[cIdx] += 
             this.settings.sinAmp * Math.sin( 
-            this.settings.sinPhv*this.progress + cIdx/(this.curvatures.length-1.0) 
+            this.settings.sinPhv*time + cIdx/(this.curvatures.length-1.0) 
             *this.settings.sinFrq*2*Math.PI);
     }
 
     // Rebuild tangents from curvatures
-    for (tIdx=1; tIdx<this.tangents.length; tIdx++) {
+    for (var tIdx=1; tIdx<this.tangents.length; tIdx++) {
         var angle = this.curvatures[tIdx];
         var t0 = this.tangents[tIdx-1];
         var newT = new THREE.Vector3();
@@ -93,7 +108,7 @@ proto.setTime = function(time) {
     }
 
     // Rebuild point positions from tangents
-    for (pIdx=1; pIdx<this.pts.length; pIdx++) {
+    for (var pIdx=1; pIdx<this.pts.length; pIdx++) {
         this.pts[pIdx].copy(this.pts[pIdx-1]);
         this.pts[pIdx].add(this.tangents[pIdx-1]);
     }
@@ -102,7 +117,7 @@ proto.setTime = function(time) {
     // distribute it positionally evenly amongst all the points.
     var totalErr = new THREE.Vector3()
     totalErr.subVectors(this.pts[0], this.pts[this.pts.length-1]);
-    for (i=0; i<this.pts.length; i++) {
+    for (var i=0; i<this.pts.length; i++) {
         var t = i/(this.pts.length-1.0);
         var fracErr = new THREE.Vector3();
         fracErr.copy(totalErr);
@@ -110,34 +125,41 @@ proto.setTime = function(time) {
         this.pts[i].add(fracErr);
     }
 
+    // Rebuild point positions from tangents
+    var centroid = new THREE.Vector3();
+    for (var pIdx=0; pIdx<this.pts.length; pIdx++) {
+        centroid.add(this.pts[pIdx]);
+    }
+    centroid.multiplyScalar(1.0/this.pts.length);
+
     // Consider new point positions and rotate them about p0 so that
-    // edge 0 matches the desired orientation.  This accounts for
+    // p0 -> p(n/2) matches the desired orientation.  This accounts for
     // the arbitrary rotations that arbitrary curvature operations cause.
     var currentAngle = computeBaseAngle(this.pts);
-    var desiredAngle = (1-time)*this.restAngleA + time*this.restAngleB;
+    var desiredAngle = (1-time)*this.restAngles[curveAIdx] + time*this.restAngles[curveBIdx];
 
+    var centroidToOrigin = new THREE.Matrix4();
+    centroidToOrigin.makeTranslation(-centroid.x, -centroid.y, -centroid.z);
     var originRotMat = new THREE.Matrix4();
     originRotMat.makeRotationZ(desiredAngle - currentAngle);
     var toOrigin = new THREE.Matrix4();
-    toOrigin.makeTranslation(this.pts[0].x, this.pts[0].y, this.pts[0].z);
+    toOrigin.makeTranslation(-this.pts[0].x, -this.pts[0].y, -this.pts[0].z);
     var fromOrigin = new THREE.Matrix4();
-    fromOrigin.makeTranslation(-this.pts[0].x, -this.pts[0].y, -this.pts[0].z);
+    fromOrigin.makeTranslation(this.pts[0].x, this.pts[0].y, this.pts[0].z);
 
     var fixMat = new THREE.Matrix4();
-    fixMat.multiply(toOrigin);
-    fixMat.multiply(originRotMat);
     fixMat.multiply(fromOrigin);
+    fixMat.multiply(originRotMat);
+    fixMat.multiply(toOrigin);
+    fixMat.multiply(centroidToOrigin);
 
     // XXX TODO wtf r u kidding me
     this.meshWhite.matrix.identity();
     this.meshWhite.applyMatrix(fixMat);
-    this.meshWhite.scale.x = 400;
-    this.meshWhite.scale.y = 400;
     this.meshWhite.matrixWorldNeedsUpdate = true;
+
     this.meshColored.matrix.identity();
     this.meshColored.applyMatrix(fixMat);
-    this.meshColored.scale.x = 400;
-    this.meshColored.scale.y = 400;
     this.meshColored.matrixWorldNeedsUpdate = true;
 
     // commit new point positions
@@ -156,7 +178,7 @@ function computeTangents(pts) {
 
     // TODO use native array
     var ts = [];
-    for (i=0; i<pts.length-1; i++) {
+    for (var i=0; i<pts.length-1; i++) {
         var p = pts[i];
         var p1 = pts[i+1];
         var t = new THREE.Vector3();
@@ -177,7 +199,7 @@ function computeCurvatures(pts) {
 
     var cs = [];
 
-    for (cIdx=0; cIdx<pts.length-1; cIdx++) {
+    for (var cIdx=0; cIdx<pts.length-1; cIdx++) {
         
         var t0Idx = cIdx - 1;
         if (t0Idx < 0) {
@@ -215,7 +237,11 @@ function computeCurvatures(pts) {
 
 function computeBaseAngle(pts) {
     var t = new THREE.Vector3();
-    t.subVectors(pts[25], pts[0]);
+    t.subVectors(pts[Math.floor((pts.length-1)/2)], pts[0]);
     t.normalize();
     return Math.atan2(t.y, t.x);
+}
+
+function smoothStep(t) {
+    return 6*t*t*t*t*t - 15*t*t*t*t + 10*t*t*t;
 }
