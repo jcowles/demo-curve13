@@ -15,8 +15,8 @@ F.Shots.CircleSpline_1 = function(duration) {
         this.rotateX = -.5;
         this.rotateY = 0.0;
         this.camX = 0;
-        this.camY = -300;
-        this.camZ = 800;
+        this.camY = -200;
+        this.camZ = 550;
         this.hue = .6
     })();
 };
@@ -155,7 +155,7 @@ proto.onPreload = function() {
         //color: 0xff0000
         var line, p, scale = 0.3*5.5, d = 10;
         var mesh = new THREE.Mesh(geoRibbon, mat);
-        mesh.scale.x = mesh.scale.y = mesh.scale.z = .3*5.5;
+        //mesh.scale.x = mesh.scale.y = mesh.scale.z = .3*5.5;
         mesh.position.x = d;
         mesh.position.y = d;
         mesh.position.z = 0;
