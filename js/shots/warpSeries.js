@@ -79,6 +79,7 @@ proto.setTime = function(time) {
     var curveAIdx = Math.floor(floatIdx);
     var curveBIdx = Math.min(curveAIdx+1, this.curvesList.length-1);
     var fracIdx = floatIdx - curveAIdx;
+    fracIdx = smoothStep(fracIdx);
 
     //log(this.curvaturesList.length + " " + curveAIdx + " " + curveBIdx + " " + fracIdx);
 
@@ -239,4 +240,8 @@ function computeBaseAngle(pts) {
     t.subVectors(pts[Math.floor((pts.length-1)/2)], pts[0]);
     t.normalize();
     return Math.atan2(t.y, t.x);
+}
+
+function smoothStep(t) {
+    return 6*t*t*t*t*t - 15*t*t*t*t + 10*t*t*t;
 }
