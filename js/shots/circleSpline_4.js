@@ -42,7 +42,7 @@ proto.onDraw = function(time, dt) {
         if (ti == 0)
             ti = .001;
 
-        arcDriver(tracer, ti);
+        me.arcDriver(tracer, ti);
         
         ribbonMesh.geometry.update(new THREE.Vector3(0,0,1), 
                                  tracer.points, 
@@ -52,7 +52,7 @@ proto.onDraw = function(time, dt) {
 
 }
 
-function foo(tracer, a, b, max, state) {
+proto.applyTrace = function(tracer, a, b, max, state) {
     if (state.angle < max) {
         tracer.arc(a,b,state.angle,state.lock);
         state.lock = true;
@@ -63,16 +63,16 @@ function foo(tracer, a, b, max, state) {
     return state;
 }
 
-function arcDriver(tracer, angle) {
+proto.arcDriver = function(tracer, angle) {
     var state = { lock: false,
               angle: angle };
 
-    state = foo(tracer,0,0,90,state);
-    state = foo(tracer,0,1,90,state);
-    state = foo(tracer,-1,0,90,state);
-    state = foo(tracer,0,0,90,state);
-    state = foo(tracer,0,0,90,state);
-    state = foo(tracer,0,-1,90,state);
+    state = this.applyTrace(tracer,0,0,90,state);
+    state = this.applyTrace(tracer,0,1,90,state);
+    state = this.applyTrace(tracer,-1,0,90,state);
+    state = this.applyTrace(tracer,0,0,90,state);
+    state = this.applyTrace(tracer,0,0,90,state);
+    state = this.applyTrace(tracer,0,-1,90,state);
 }
 
 

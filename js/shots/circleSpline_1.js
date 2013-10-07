@@ -35,14 +35,14 @@ proto.onDraw = function(time, dt) {
     this.lineGroup.rotation.y = this.settings.rotateY;
     this.lineGroup.rotation.z = Math.sin(this.progress * Math.PI); //this.progress*4;
 
-    time = this.progress*90*8;
+    time = this.progress*120*10;
     var normal = new THREE.Vector3(0,0,1);
     this.ribbons.forEach(function(ribbonMesh, index) {
         me.tracer.reset(me.origin, me.size, ribbonMesh.ribbonOffset)
         me.tracer.iterations = 20;
         t = (time - ribbonMesh.ribbonOffset) + Math.sin(me.progress * 2*Math.PI) * 100;
         if (t < 0) t = 0.001;
-        arcDriver(me.tracer, t);
+        me.arcDriver(me.tracer, t);
         
         ribbonMesh.geometry.update(normal, 
                                  me.tracer.points, 
@@ -66,7 +66,7 @@ function foo(tracer, a, b, max, state) {
     return state;
 }
 
-function arcDriver(tracer, angle) {
+proto.arcDriver = function (tracer, angle) {
     var state = { lock: false,
               angle: angle };
 
@@ -76,6 +76,10 @@ function arcDriver(tracer, angle) {
     foo(tracer,0,0,90,state);
     foo(tracer,0,0,90,state);
     foo(tracer,0,-1,90,state);
+    foo(tracer,0,0,90,state);
+    foo(tracer,0,0,90,state);
+    foo(tracer,0,0,90,state);
+    foo(tracer,0,0,90,state);
 }
 
 
@@ -124,13 +128,8 @@ proto.onPreload = function() {
 
     for (var i = 0; i < count; i++) {
         tracer = new F.ArcTracer(this.origin, this.size, offset);
-
-        tracer.arc(0,0,90); // can flip either
-        tracer.arc(0,1,90); // can only flip +y
-        tracer.arc(-1,0,90); // can only flip -x
-        tracer.arc(0,0,90); // can only flip y
-        tracer.arc(0,0,90); // can only flip x
-        tracer.arc(0,-1,90); // can only flip x
+        tracer.iterations = 20;
+        //arcDriver(tracer, 0);
 
         flipColor = !flipColor;
 
