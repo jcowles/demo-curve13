@@ -8,11 +8,14 @@ proto = Object.create(F.Shot.prototype);
 
 proto.onPreload = function() {
 
-    curveA = CURVE_STAR;
-    curveB = CURVE_BABE;
+    var curveA = CURVE_STAR;
+    var curveB = CURVE_BABE;
 
     this.curvaturesA = computeCurvatures(curveA);
     this.curvaturesB = computeCurvatures(curveB);
+
+    this.restAngleA = computeBaseAngle(curveA);
+    this.restAngleB = computeBaseAngle(curveB);
 
     this.curvatures = computeCurvatures(curveA);
     this.tangents = computeTangents(curveA);
@@ -51,17 +54,17 @@ proto.onPreload = function() {
 
 	this.composer = new THREE.EffectComposer( renderer );
     
-    renderModel = new THREE.RenderPass(this.sceneColored, this.camera);
+    var renderModel = new THREE.RenderPass(this.sceneColored, this.camera);
 	this.composer.addPass( renderModel ); // render to buffer1
 	
-    effectBloom = new THREE.BloomPass(2.3, 25, 4.0, 512);
+    var effectBloom = new THREE.BloomPass(2.3, 25, 4.0, 512);
     this.composer.addPass( effectBloom ); // render to internal buffers, finally to buffer1
 
-    renderModelWhite = new THREE.RenderPass(this.sceneWhite, this.camera);
+    var renderModelWhite = new THREE.RenderPass(this.sceneWhite, this.camera);
     renderModelWhite.clear = false;
     this.composer.addPass(renderModelWhite); // render to buffer1
 
-    effectCopy = new THREE.ShaderPass(THREE.CopyShader);
+    var effectCopy = new THREE.ShaderPass(THREE.CopyShader);
     effectCopy.renderToScreen = true;
     this.composer.addPass( effectCopy ); // render to screen
 
@@ -72,7 +75,7 @@ proto.onDraw = function(time, dt) {
 
 	renderer.setClearColor(0, 1);
 
-	time = this.progress
+	var time = this.progress
 	time = Math.min(1,time*1.5)
 
     // Lerp curvatures according to time or transition
@@ -82,14 +85,14 @@ proto.onDraw = function(time, dt) {
 
     // Add some stressful perturbations
     for (cIdx=0; cIdx<this.curvatures.length; cIdx++) {
-        this.curvatures[cIdx] += 0.2*Math.sin(this.progress*20 + cIdx/(this.curvatures.length-1.0)*75*2*Math.PI)
+        this.curvatures[cIdx] += 0.4*Math.sin(this.progress*40 + cIdx/(this.curvatures.length-1.0)*75*2*Math.PI)
     }    
 
     // Rebuild tangents from curvatures
     for (tIdx=1; tIdx<this.tangents.length; tIdx++) {
-        angle = this.curvatures[tIdx];
-        t0 = this.tangents[tIdx-1];
-        newT = new THREE.Vector3();
+        var angle = this.curvatures[tIdx];
+        var t0 = this.tangents[tIdx-1];
+        var newT = new THREE.Vector3();
         newT.copy(t0);
         newT.applyAxisAngle(new THREE.Vector3(0,0,1), angle);
         this.tangents[tIdx] = newT;
@@ -103,14 +106,37 @@ proto.onDraw = function(time, dt) {
 
     // Terrible hack.  Look at error between first and last point and
     // distribute it positionally evenly amongst all the points.
-    totalErr = new THREE.Vector3()
+    var totalErr = new THREE.Vector3()
     totalErr.subVectors(this.pts[0], this.pts[this.pts.length-1]);
     for (i=0; i<this.pts.length; i++) {
-        t = i/(this.pts.length-1.0);
-        fracErr = new THREE.Vector3();
+        var t = i/(this.pts.length-1.0);
+        var fracErr = new THREE.Vector3();
         fracErr.copy(totalErr);
         fracErr.multiplyScalar(t);
         this.pts[i].add(fracErr);
+    }
+
+    // Consider new point positions and rotate them about p0 so that
+    // edge 0 matches the desired orientation.  This accounts for
+    // the arbitrary rotations that arbitrary curvature operations cause.
+    var currentAngle = computeBaseAngle(this.pts);
+    var desiredAngle = this.restAngleB;//(1-time)*this.restAngleA + time*this.restAngleB;
+
+    var originRotMat = new THREE.Matrix4();
+    originRotMat.makeRotationZ(desiredAngle - currentAngle);
+    var toOrigin = new THREE.Matrix4();
+    toOrigin.makeTranslation(this.pts[0].x, this.pts[0].y, this.pts[0].z);
+    var fromOrigin = new THREE.Matrix4();
+    fromOrigin.makeTranslation(-this.pts[0].x, -this.pts[0].y, -this.pts[0].z);
+
+    var fixMat = new THREE.Matrix4();
+    fixMat.multiply(toOrigin);
+    fixMat.multiply(originRotMat);
+    fixMat.multiply(fromOrigin);
+
+    // XXX wtf this is unnecessarily inefficient
+    for (i=0; i<this.pts.length; i++) {
+        this.pts[i].applyMatrix4(fixMat);
     }
 
     // commit new point positions
@@ -132,11 +158,11 @@ function computeTangents(pts) {
     // the 0th tangent vector is between pts 0 and 1
 
     // TODO use native array
-    ts = [];
+    var ts = [];
     for (i=0; i<pts.length-1; i++) {
-        p = pts[i];
-        p1 = pts[i+1];
-        t = new THREE.Vector3();
+        var p = pts[i];
+        var p1 = pts[i+1];
+        var t = new THREE.Vector3();
         t.subVectors(p1,p);
         ts.push(t);
     }
@@ -150,39 +176,39 @@ function computeCurvatures(pts) {
     // is identical to the first point's, because
     // we assume closed curves with pts[-1]==pts[0]
 
-    ts = computeTangents(pts);
+    var ts = computeTangents(pts);
 
-    cs = [];
+    var cs = [];
 
     for (cIdx=0; cIdx<pts.length-1; cIdx++) {
         
-        t0Idx = cIdx - 1;
+        var t0Idx = cIdx - 1;
         if (t0Idx < 0) {
             t0Idx = ts.length-1;
         }
         
-        t0 = ts[t0Idx];
-        t1 = ts[cIdx];
+        var t0 = ts[t0Idx];
+        var t1 = ts[cIdx];
 
         // Compute the rotation about Z that takes t0 to t1
 
         // transform t1 by the xf that would take t0 to +X, then use atan2 on the
         // result to give the angle to t1 from +X.
-        t0Norm = new THREE.Vector3();
+        var t0Norm = new THREE.Vector3();
         t0Norm.copy(t0);
         t0Norm.normalize();
-        m = new THREE.Matrix4(t0Norm.x, -t0Norm.y, 0, 0,
+        var m = new THREE.Matrix4(t0Norm.x, -t0Norm.y, 0, 0,
                               t0Norm.y, t0Norm.x, 0, 0,
                               0, 0, 1, 0,
                               0, 0, 0, 1);
-        mInv = new THREE.Matrix4();
+        var mInv = new THREE.Matrix4();
         mInv.getInverse(m); // NOT REALLY REQUIRED, JUST INVERT BY REARRANGEMENT HERE
 
-        t1Norm = new THREE.Vector3();
+        var t1Norm = new THREE.Vector3();
         t1Norm.copy(t1);
         t1Norm.normalize();
         t1Norm.applyMatrix4(mInv);
-        angle = Math.atan2(t1Norm.y, t1Norm.x);
+        var angle = Math.atan2(t1Norm.y, t1Norm.x);
 
         cs[cIdx] = angle;
     }
@@ -190,4 +216,9 @@ function computeCurvatures(pts) {
     return cs;
 }
 
-
+function computeBaseAngle(pts) {
+    var t = new THREE.Vector3();
+    t.subVectors(pts[25], pts[0]);
+    t.normalize();
+    return Math.atan2(t.y, t.x);
+}
