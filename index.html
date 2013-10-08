@@ -27,6 +27,8 @@
         <script src="js/shots/circleSpline_3.js"></script>
         <script src="js/shots/circleSpline_4.js"></script>
         <script src="js/shots/circleSpline_5.js"></script>
+        <script src="js/shots/chase_1.js"></script>
+        <script src="js/shots/intro.js"></script>
 
         <!-- curve assets -->
         <script src="curves/babe.js"></script>
@@ -38,11 +40,63 @@
             //
             // Main entry point
             //
-            window.onload = function() {
-                init();
+            _audioReady = false;
+            _glReady = false;
+
+            function tryToPlay() {
+                if (!_glReady) {
+                    init();
+                    _glReady = true;
+                }
+                //
+                // If we're not ready to play, continue spinning
+                // 
+                if (!_audioReady || !_glReady) {
+                    setTimeout(tryToPlay, 500);
+                    return;
+                }
+
+                // run the demo, audio playback will kick off 
+                // the animation.
+                seq.play();
+            }
+
+            function beginPlaying() {
+                // Track the actual start time for debugging
+                var now = new Date().getTime();
+                var trackTime = seq.audio.currentTime*1000;
+                seq.audio._startTime =  now - trackTime;
+
+                // Audio started, now start the animation
                 animate();
+            }
+
+            window.onload = function() {
+                tryToPlay();
             };
 
-        </script>        
+            document.onkeyup = function(e) {
+                var ESC = 27,
+                    K_LEFT = 37,
+                    K_RIGHT = 39;
+
+                if (e.keyCode == ESC) { 
+                    if (seq.isPlaying()) {
+                        seq.pause()
+                    } else {
+                        seq.play()
+                    }
+                }  else {
+                    console.log("Time: " + seq.getTime() + "s" + 
+                                ", key pressed: " + e.keyCode);
+                }
+            }
+
+        </script>
+        <audio id="soundtrack" 
+                src="music/audio.mp3" 
+                style="display: none" 
+                oncanplay="_audioReady = true;"
+                onplaying="beginPlaying();"></audio>
     </body>
 </html>

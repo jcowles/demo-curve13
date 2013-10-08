@@ -3,30 +3,35 @@
 // The Sequence object
 //
 
-F.Seq = function(renderer) {
+F.Seq = function(renderer, audio) {
     var autostart = false;
     this.shots = [];
     this.shotIndex = -1;
     this.renderer = renderer;
-    this._clock = new THREE.Clock(autostart); 
+    this.audio = audio;
     this.gui = null;
+    this._lastTime = 0;
 };
 
 F.Seq.prototype = {
+    isPlaying: function() {
+        return !this.audio.paused;
+    },
+
     play: function() {
         if (!this.shots.length) {
             warn("F.Seq cannot play: no shots added");
             return;
         }
-        this._clock.start();
+        this.audio.play();
     },
 
     pause: function() {
-        this._clock.stop();
+        this.audio.pause();
     },
 
     getTime: function() {
-        return this._clock.elapsedTime;
+        return this._lastTime;
     },
 
     setShot: function(index) {
@@ -48,12 +53,13 @@ F.Seq.prototype = {
     },
 
     update: function() {
-        if (!this._clock.running)
+        if (!this.isPlaying())
             return;
 
-        // Update the clock.
-        // Careful: calling clock methods update its state.
-        var dt = this._clock.getDelta();
+        // Checkpoint the current time
+        var newTime = this.audio.currentTime;
+        var dt = newTime - this._lastTime;
+        this._lastTime = newTime;
 
         if (this.shotIndex == -1) {
             this.setShot(0);
