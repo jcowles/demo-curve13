@@ -45,18 +45,43 @@ F.WarpSeries = function(camera, curvesList) {
 
     //////////////////////
 
+    //////////////////////
+
+    this.nextSpawnIdx = 0;
+
+    this.sceneSparks = new THREE.Scene();
+    this.geometrySparks = new THREE.Geometry();
+    this.numSparks = 1000;
+    for (var i=0; i<this.numSparks; i++) {
+        this.geometrySparks.vertices.push(new THREE.Vector3(10000,0,0));
+    }
+    for (var i=0; i<this.numSparks; i++) {
+        this.geometrySparks.colors.push(new THREE.Vector3(0,1,0));
+    }
+
+    var matSparks = new THREE.ParticleBasicMaterial( {size:0.001} );
+    matSparks.depthTest = false;
+    this.sparks = new THREE.ParticleSystem(this.geometrySparks, matSparks);
+    this.sceneSparks.add(this.sparks);
+    var renderSparks = new THREE.RenderPass(this.sceneSparks, this.camera);
+    renderSparks.clear = false;
+
+    //////////////////////
+
     this.composer = new THREE.EffectComposer( renderer );
     
     var renderModel = new THREE.RenderPass(this.sceneColored, this.camera);
     this.composer.addPass( renderModel ); // render to buffer1
-    
+
     var effectBloom = new THREE.BloomPass(2.3, 25, 4.0, 512);
     this.composer.addPass( effectBloom ); // render to internal buffers, finally to buffer1
+
+    this.composer.addPass(renderSparks); // render to buffer1
 
     var renderModelWhite = new THREE.RenderPass(this.sceneWhite, this.camera);
     renderModelWhite.clear = false;
     this.composer.addPass(renderModelWhite); // render to buffer1
-
+    
     var effectCopy = new THREE.ShaderPass(THREE.CopyShader);
     effectCopy.renderToScreen = true;
     this.composer.addPass( effectCopy ); // render to screen
@@ -154,6 +179,7 @@ proto.setTime = function(time) {
     fixMat.multiply(centroidToOrigin);
 
     // XXX TODO wtf r u kidding me
+    
     this.meshWhite.matrix.identity();
     this.meshWhite.applyMatrix(fixMat);
     this.meshWhite.matrixWorldNeedsUpdate = true;
@@ -161,12 +187,35 @@ proto.setTime = function(time) {
     this.meshColored.matrix.identity();
     this.meshColored.applyMatrix(fixMat);
     this.meshColored.matrixWorldNeedsUpdate = true;
-
+    
     // commit new point positions
     this.geometry.update(
         new THREE.Vector3(0,0,1),
         this.pts,
         [0.02]);
+
+    // Update particles.
+    // "Spawn" a certain number of particles by resetting the
+    // next few particles to be randomly positioned on the 
+    // curve.
+
+    for (var i=0; i<this.settings.spawnRate; i++) {
+        var sparkIdx = this.nextSpawnIdx;
+        var pIdx = Math.floor(Math.random()*this.pts.length-1);
+        var spark = this.geometrySparks.vertices[sparkIdx];
+        spark.copy(this.pts[pIdx]);
+        spark.applyMatrix4(fixMat);
+
+        this.nextSpawnIdx = (this.nextSpawnIdx+1) % this.geometrySparks.vertices.length;
+    }
+    // All other particles not just spawned will get updated.
+    for (var i=0; i<this.geometrySparks.vertices.length - this.settings.spawnRate; i++) {
+        var sparkIdx = i % this.geometrySparks.vertices.length;
+        this.geometrySparks.vertices[sparkIdx].y += 0.01 + 0.01*Math.random();
+        this.geometrySparks.vertices[sparkIdx].x += 0.005 * (Math.sin(time*20 + sparkIdx));
+    }
+
+    this.geometrySparks.verticesNeedUpdate = true;
 }
 
 F.WarpSeries.prototype = proto;

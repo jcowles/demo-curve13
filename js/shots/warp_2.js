@@ -4,9 +4,10 @@ F.Shots.Warp_2 = function(duration, filenameA, filenameB) {
     F.Shot.call(this, "Warp_2", duration);
 
     this.settings = new (function() {
-        this.sinAmp = 0.01;
-        this.sinFrq = 21;
-        this.sinPhv = 3;
+        this.sinAmp = 0.12;
+        this.sinFrq = 38;
+        this.sinPhv = 57;
+        this.spawnRate = 10;
     })();
 
 };
@@ -22,6 +23,7 @@ proto.getGui = function() {
     gui.add(this.settings, 'sinAmp', 0, 0.2);
     gui.add(this.settings, 'sinFrq', 0, 160);
     gui.add(this.settings, 'sinPhv', 0, 160);
+    gui.add(this.settings,"spawnRate",  0, 100);
     return gui;
 }
 
@@ -35,7 +37,7 @@ proto.onPreload = function() {
     //////////////////////
 
     
-    this.warpSeries = new F.WarpSeries(this.camera, [CURVE_STAR, CURVE_BABE, CURVE_BABE, CURVE_STAR]);
+    this.warpSeries = new F.WarpSeries(this.camera, [CURVE_STAR, CURVE_BABE]);
 
     this.warpSeries.settings = this.settings;
 
