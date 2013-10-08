@@ -35,7 +35,7 @@ proto.onDraw = function(time, dt) {
     this.lineGroup.rotation.y = this.settings.rotateY;
     this.lineGroup.rotation.z = Math.sin(this.progress * Math.PI); //this.progress*4;
 
-    time = this.progress*120*10;
+    time = this.progress*190*10;
     var normal = new THREE.Vector3(0,0,1);
     this.ribbons.forEach(function(ribbonMesh, index) {
         me.tracer.reset(me.origin, me.size, ribbonMesh.ribbonOffset)
@@ -79,6 +79,8 @@ proto.arcDriver = function (tracer, angle) {
     foo(tracer,0,0,90,state);
     foo(tracer,0,0,90,state);
     foo(tracer,0,0,90,state);
+    foo(tracer,0,0,90,state);
+    foo(tracer,1,0,90,state);
     foo(tracer,0,0,90,state);
 }
 
@@ -239,7 +241,7 @@ F.ArcTracer = function (origin, size, offset) {
             var nextPoint = new THREE.Vector3(
                                 this.origin.x + (this.xLoc*2*this.size) + size*Math.cos(this.xAngle+(i*dtheta)), 
                                 this.origin.y + (this.yLoc*2*this.size) + size*Math.sin(this.yAngle+(i*dtheta)), 
-                                10-(this.t/10));
+                                10-Math.sin(2*Math.PI*this.t+5));
             this.points.push(nextPoint);
         }
 
