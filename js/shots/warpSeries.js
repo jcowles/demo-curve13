@@ -5,6 +5,7 @@ F.WarpSeries = function(camera, curvesList) {
     this.curvaturesList = [];
     this.restAngles = [];
     this.restCurvatureSums = []
+    this.restEdgeLens = []
 
     for (var i=0; i<this.curvesList.length; i++) {
         c = this.curvesList[i];
@@ -12,6 +13,7 @@ F.WarpSeries = function(camera, curvesList) {
         this.curvaturesList.push(curvatures);
         this.restAngles.push(computeBaseAngle(c));
         this.restCurvatureSums.push(computeCurvatureSum(curvatures));
+        this.restEdgeLens.push(computeEdgeLen(c));
     }
 
     // Init the "current" arrays with the first curve.
@@ -137,6 +139,8 @@ proto.setTime = function(time) {
 
 
     // Rebuild tangents from curvatures
+    this.tangents[0].normalize();
+    this.tangents[0].multiplyScalar((1-fracIdx)*this.restEdgeLens[curveAIdx] + fracIdx*this.restEdgeLens[curveBIdx]);
     for (var tIdx=1; tIdx<this.tangents.length; tIdx++) {
         var angle = this.curvatures[tIdx];
         var t0 = this.tangents[tIdx-1];
@@ -164,7 +168,7 @@ proto.setTime = function(time) {
         this.pts[i].add(fracErr);
     }
 
-    // Rebuild point positions from tangents
+    // Compute centroid after fixing up positional continuity
     var centroid = new THREE.Vector3();
     for (var pIdx=0; pIdx<this.pts.length; pIdx++) {
         centroid.add(this.pts[pIdx]);
@@ -296,9 +300,30 @@ function computeCurvatures(pts) {
     return cs;
 }
 
-function computeBaseAngle(pts) {
+/*
+function computeBaseAngle1(pts) {
     var t = new THREE.Vector3();
     t.subVectors(pts[Math.floor((pts.length-1)/2)], pts[0]);
+    t.normalize();
+    return Math.atan2(t.y, t.x);
+}
+
+function computeBaseAngle2(pts) {
+    var a = new THREE.Vector3();
+    var b = new THREE.Vector3();
+    a.subVectors(pts[1], pts[0]);
+    b.subVectors(pts[pts.length-2], pts[pts.length-1]);
+    a.normalize();
+    b.normalize();
+    a.add(b);
+    a.normalize();
+    return Math.atan2(a.y, a.x);
+}
+*/
+
+function computeBaseAngle(pts) {
+    var t = new THREE.Vector3();
+    t.subVectors(pts[100], pts[0]);
     t.normalize();
     return Math.atan2(t.y, t.x);
 }
@@ -309,6 +334,12 @@ function computeCurvatureSum(cs) {
         result += cs[i];
     }
     return result;
+}
+
+function computeEdgeLen(pts) {
+    var e = new THREE.Vector3();
+    e.subVectors(pts[1], pts[0]);
+    return e.length();
 }
 
 function smoothStep(t) {
