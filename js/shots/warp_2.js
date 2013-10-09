@@ -20,7 +20,7 @@ proto.getGui = function() {
     //
     
     var gui = new dat.GUI();
-    gui.add(this.settings, 'sinAmp', 0, 0.2);
+    gui.add(this.settings, 'sinAmp', 0, 1);
     gui.add(this.settings, 'sinFrq', 0, 160);
     gui.add(this.settings, 'sinPhv', 0, 160);
     gui.add(this.settings,"spawnRate",  0, 100);
@@ -29,15 +29,27 @@ proto.getGui = function() {
 
 proto.onPreload = function() {
 
-    this.camera = new THREE.PerspectiveCamera( 75, 
+    this.camera = new THREE.PerspectiveCamera( 50, 
                                 window.innerWidth / window.innerHeight, 
                                 1, 10000 );
+    this.camera.position.x = 2;
     this.camera.position.z = 2;
+    this.camera.rotation.y = 0.7;
 
     //////////////////////
 
     
-    this.warpSeries = new F.WarpSeries(this.camera, [CURVE_HEART, CURVE_FLAME, CURVE_ARROW]);
+    this.warpSeries = new F.WarpSeries(this.camera, [
+
+        CURVE_HEART,
+        CURVE_HEART,
+        CURVE_ARROW,
+        CURVE_ARROW,
+        CURVE_FLAME,
+        CURVE_FLAME,
+        CURVE_BABE,
+        CURVE_BABE,
+        ]);
 
     this.warpSeries.settings = this.settings;
 

@@ -4,11 +4,16 @@ F.WarpSeries = function(camera, curvesList) {
     this.curvesList = curvesList;
     this.curvaturesList = [];
     this.restAngles = [];
+    this.restCurvatureSums = []
+    this.restEdgeLens = []
 
     for (var i=0; i<this.curvesList.length; i++) {
         c = this.curvesList[i];
-        this.curvaturesList.push(computeCurvatures(c));
+        var curvatures = computeCurvatures(c);
+        this.curvaturesList.push(curvatures);
         this.restAngles.push(computeBaseAngle(c));
+        this.restCurvatureSums.push(computeCurvatureSum(curvatures));
+        this.restEdgeLens.push(computeEdgeLen(c));
     }
 
     // Init the "current" arrays with the first curve.
@@ -123,7 +128,19 @@ proto.setTime = function(time) {
             *this.settings.sinFrq*2*Math.PI);
     }
 
+    // Enforce that the sum of the perturbed curvature is the same as the
+    // rest curvature sum.  This prevents perturbation-induced discontinuity at
+    // the endpoint.
+    var posedCurvatureSum = computeCurvatureSum(this.curvatures);
+    for (var cIdx=0; cIdx<this.curvatures.length; cIdx++) {
+        var desiredCurvatureSum = (1-fracIdx)*this.restCurvatureSums[curveAIdx] + fracIdx*this.restCurvatureSums[curveBIdx];
+        this.curvatures[cIdx] += (desiredCurvatureSum - posedCurvatureSum) / this.curvatures.length;
+    }
+
+
     // Rebuild tangents from curvatures
+    this.tangents[0].normalize();
+    this.tangents[0].multiplyScalar((1-fracIdx)*this.restEdgeLens[curveAIdx] + fracIdx*this.restEdgeLens[curveBIdx]);
     for (var tIdx=1; tIdx<this.tangents.length; tIdx++) {
         var angle = this.curvatures[tIdx];
         var t0 = this.tangents[tIdx-1];
@@ -151,7 +168,7 @@ proto.setTime = function(time) {
         this.pts[i].add(fracErr);
     }
 
-    // Rebuild point positions from tangents
+    // Compute centroid after fixing up positional continuity
     var centroid = new THREE.Vector3();
     for (var pIdx=0; pIdx<this.pts.length; pIdx++) {
         centroid.add(this.pts[pIdx]);
@@ -174,7 +191,6 @@ proto.setTime = function(time) {
     for (var pIdx=0; pIdx<this.pts.length; pIdx++) {
         this.pts[pIdx].applyMatrix4(originRotMat);
     }
-
 
     // XXX TODO WTF Why do these lines need to be present?
     this.meshWhite.matrix.identity();
@@ -284,11 +300,46 @@ function computeCurvatures(pts) {
     return cs;
 }
 
-function computeBaseAngle(pts) {
+/*
+function computeBaseAngle1(pts) {
     var t = new THREE.Vector3();
     t.subVectors(pts[Math.floor((pts.length-1)/2)], pts[0]);
     t.normalize();
     return Math.atan2(t.y, t.x);
+}
+
+function computeBaseAngle2(pts) {
+    var a = new THREE.Vector3();
+    var b = new THREE.Vector3();
+    a.subVectors(pts[1], pts[0]);
+    b.subVectors(pts[pts.length-2], pts[pts.length-1]);
+    a.normalize();
+    b.normalize();
+    a.add(b);
+    a.normalize();
+    return Math.atan2(a.y, a.x);
+}
+*/
+
+function computeBaseAngle(pts) {
+    var t = new THREE.Vector3();
+    t.subVectors(pts[100], pts[0]);
+    t.normalize();
+    return Math.atan2(t.y, t.x);
+}
+
+function computeCurvatureSum(cs) {
+    result = 0.0
+    for (var i=0; i<cs.length; i++) {
+        result += cs[i];
+    }
+    return result;
+}
+
+function computeEdgeLen(pts) {
+    var e = new THREE.Vector3();
+    e.subVectors(pts[1], pts[0]);
+    return e.length();
 }
 
 function smoothStep(t) {
