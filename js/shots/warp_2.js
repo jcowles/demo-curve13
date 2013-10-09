@@ -29,16 +29,18 @@ proto.getGui = function() {
 
 proto.onPreload = function() {
 
-    this.camera = new THREE.PerspectiveCamera( 75, 
+    this.camera = new THREE.PerspectiveCamera( 50, 
                                 window.innerWidth / window.innerHeight, 
                                 1, 10000 );
+    this.camera.position.x = 2;
     this.camera.position.z = 2;
+    this.camera.rotation.y = 0.7;
 
     //////////////////////
 
     
     this.warpSeries = new F.WarpSeries(this.camera, [
-        
+
         CURVE_HEART,
         CURVE_HEART,
         CURVE_ARROW,
