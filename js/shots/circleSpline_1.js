@@ -37,9 +37,25 @@ proto.onDraw = function(time, dt) {
 
     time = this.progress*190*10;
     var normal = new THREE.Vector3(0,0,1);
+
     this.ribbons.forEach(function(ribbonMesh, index) {
+        var p_cutoff = (Math.cos(me.progress*10)*.5 + .5) * (70*5);
+        var n_cutoff = -1 * ((Math.sin(me.progress*10)*.5 + .5) * (70*5));
+        if (ribbonMesh.ribbonOffset > 0 &&
+            ribbonMesh.ribbonOffset > p_cutoff) {
+            ribbonMesh.visible = false;
+            return;
+        }
+        if (ribbonMesh.ribbonOffset < 0 &&
+            ribbonMesh.ribbonOffset < n_cutoff) {
+            ribbonMesh.visible = false;
+            return;
+        }
+
+        ribbonMesh.visible = true;
         me.tracer.reset(me.origin, me.size, ribbonMesh.ribbonOffset)
         me.tracer.iterations = 20;
+
         t = (time - ribbonMesh.ribbonOffset) + Math.sin(me.progress * 2*Math.PI) * 100;
         if (t < 0) t = 0.001;
         me.arcDriver(me.tracer, t);
@@ -52,6 +68,8 @@ proto.onDraw = function(time, dt) {
     var lastVert = this.ribbon.geometry.vertices[this.ribbon.geometry.vertices.length-1];
     //this.camera.position.x = lastVert.x;
     //this.camera.position.y = lastVert.y;
+    this.ribbon.geometry.frustumCulled = false;
+    this.ribbon.frustumCulled = false;
 
 }
 
