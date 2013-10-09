@@ -56,11 +56,12 @@ F.WarpSeries = function(camera, curvesList) {
         this.geometrySparks.vertices.push(new THREE.Vector3(10000,0,0));
     }
     for (var i=0; i<this.numSparks; i++) {
-        this.geometrySparks.colors.push(new THREE.Vector3(0,1,0));
+        this.geometrySparks.colors.push(new THREE.Color(0));
     }
 
-    var matSparks = new THREE.ParticleBasicMaterial( {size:0.001} );
+    matSparks = new THREE.ParticleBasicMaterial( {size:0.01} );
     matSparks.depthTest = false;
+    matSparks.vertexColors = THREE.VertexColors;
     this.sparks = new THREE.ParticleSystem(this.geometrySparks, matSparks);
     this.sceneSparks.add(this.sparks);
     var renderSparks = new THREE.RenderPass(this.sceneSparks, this.camera);
@@ -157,37 +158,30 @@ proto.setTime = function(time) {
     }
     centroid.multiplyScalar(1.0/this.pts.length);
 
+    // Move points so their centroid is at the origin
+    // TODO do this to the obj matrix instead?
+    for (var pIdx=0; pIdx<this.pts.length; pIdx++) {
+        this.pts[pIdx].sub(centroid);
+    }
+
     // Consider new point positions and rotate them about p0 so that
     // p0 -> p(n/2) matches the desired orientation.  This accounts for
     // the arbitrary rotations that arbitrary curvature operations cause.
     var currentAngle = computeBaseAngle(this.pts);
-    var desiredAngle = (1-time)*this.restAngles[curveAIdx] + time*this.restAngles[curveBIdx];
-
-    var centroidToOrigin = new THREE.Matrix4();
-    centroidToOrigin.makeTranslation(-centroid.x, -centroid.y, -centroid.z);
+    var desiredAngle = (1-fracIdx)*this.restAngles[curveAIdx] + fracIdx*this.restAngles[curveBIdx];
     var originRotMat = new THREE.Matrix4();
     originRotMat.makeRotationZ(desiredAngle - currentAngle);
-    var toOrigin = new THREE.Matrix4();
-    toOrigin.makeTranslation(-this.pts[0].x, -this.pts[0].y, -this.pts[0].z);
-    var fromOrigin = new THREE.Matrix4();
-    fromOrigin.makeTranslation(this.pts[0].x, this.pts[0].y, this.pts[0].z);
+    for (var pIdx=0; pIdx<this.pts.length; pIdx++) {
+        this.pts[pIdx].applyMatrix4(originRotMat);
+    }
 
-    var fixMat = new THREE.Matrix4();
-    fixMat.multiply(fromOrigin);
-    fixMat.multiply(originRotMat);
-    fixMat.multiply(toOrigin);
-    fixMat.multiply(centroidToOrigin);
 
-    // XXX TODO wtf r u kidding me
-    
+    // XXX TODO WTF Why do these lines need to be present?
     this.meshWhite.matrix.identity();
-    this.meshWhite.applyMatrix(fixMat);
-    this.meshWhite.matrixWorldNeedsUpdate = true;
-
+    this.meshWhite.applyMatrix(new THREE.Matrix4());
     this.meshColored.matrix.identity();
-    this.meshColored.applyMatrix(fixMat);
-    this.meshColored.matrixWorldNeedsUpdate = true;
-    
+    this.meshColored.applyMatrix(new THREE.Matrix4());
+
     // commit new point positions
     this.geometry.update(
         new THREE.Vector3(0,0,1),
@@ -204,18 +198,24 @@ proto.setTime = function(time) {
         var pIdx = Math.floor(Math.random()*this.pts.length-1);
         var spark = this.geometrySparks.vertices[sparkIdx];
         spark.copy(this.pts[pIdx]);
-        spark.applyMatrix4(fixMat);
 
         this.nextSpawnIdx = (this.nextSpawnIdx+1) % this.geometrySparks.vertices.length;
     }
     // All other particles not just spawned will get updated.
     for (var i=0; i<this.geometrySparks.vertices.length - this.settings.spawnRate; i++) {
-        var sparkIdx = i % this.geometrySparks.vertices.length;
-        this.geometrySparks.vertices[sparkIdx].y += 0.01 + 0.01*Math.random();
-        this.geometrySparks.vertices[sparkIdx].x += 0.005 * (Math.sin(time*20 + sparkIdx));
+        var sparkIdx = (i + this.nextSpawnIdx) % this.geometrySparks.vertices.length;
+        this.geometrySparks.vertices[sparkIdx].y += 0.003 + 0.01*Math.random();
+        this.geometrySparks.vertices[sparkIdx].x += 0.001 * (Math.sin(time*20 + sparkIdx));
+
+        var sparkColor = this.geometrySparks.colors[sparkIdx];
+        var sparkAge = i/this.geometrySparks.vertices.length; // 0 to 1
+        sparkColor.copy(this.meshColored.material.color);
+        sparkColor.multiplyScalar(sparkAge);
     }
 
     this.geometrySparks.verticesNeedUpdate = true;
+    this.geometrySparks.colorsNeedUpdate = true;
+
 }
 
 F.WarpSeries.prototype = proto;

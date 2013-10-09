@@ -4,9 +4,9 @@ F.Shots.Warp_2 = function(duration, filenameA, filenameB) {
     F.Shot.call(this, "Warp_2", duration);
 
     this.settings = new (function() {
-        this.sinAmp = 0.12;
-        this.sinFrq = 38;
-        this.sinPhv = 57;
+        this.sinAmp = 0.02;
+        this.sinFrq = 24;
+        this.sinPhv = 26;
         this.spawnRate = 10;
     })();
 
@@ -37,7 +37,7 @@ proto.onPreload = function() {
     //////////////////////
 
     
-    this.warpSeries = new F.WarpSeries(this.camera, [CURVE_STAR, CURVE_BABE]);
+    this.warpSeries = new F.WarpSeries(this.camera, [CURVE_HEART, CURVE_BABE, CURVE_HEART, CURVE_STAR]);
 
     this.warpSeries.settings = this.settings;
 
