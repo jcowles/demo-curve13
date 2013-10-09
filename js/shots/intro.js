@@ -12,6 +12,17 @@ proto.onBegin = function() {
 }
 
 proto.onDraw = function(time, dt) {
+    this.mesh.geometry.update(new THREE.Vector3(0,0,1), 
+                              [new THREE.Vector3(-400,0,0), 
+                               new THREE.Vector3(-100,0,0), 
+                               new THREE.Vector3(400,0,0), 
+                               new THREE.Vector3(700,0,0),
+                               new THREE.Vector3(900,0,0),
+                             ], 
+                             [200],
+                             this.progress*5, 
+                             this.progress*10);
+    //log(this.progress*10);
 }
 
 proto.getGui = function() {
@@ -31,11 +42,11 @@ proto.onPreload = function() {
     // Add some geometry
     //
     var geometry = new F.PlanerRibbonGeometry(new THREE.Vector3(0,0,1), 
-                             [new THREE.Vector3(0,0,0), 
-                              new THREE.Vector3(100,2*100,0), 
-                              new THREE.Vector3(400,2*200,0), 
-                              new THREE.Vector3(900,2*300,0),
-                              new THREE.Vector3(700,2*500,0),
+                             [new THREE.Vector3(-400,0,0), 
+                              new THREE.Vector3(-100,0,0), 
+                              new THREE.Vector3(400,0,0), 
+                              new THREE.Vector3(700,0,0),
+                              new THREE.Vector3(900,0,0),
                               ], 
                              [200]);
 

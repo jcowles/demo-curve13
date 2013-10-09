@@ -68,9 +68,6 @@ proto.onDraw = function(time, dt) {
     var lastVert = this.ribbon.geometry.vertices[this.ribbon.geometry.vertices.length-1];
     //this.camera.position.x = lastVert.x;
     //this.camera.position.y = lastVert.y;
-    this.ribbon.geometry.frustumCulled = false;
-    this.ribbon.frustumCulled = false;
-
 }
 
 function foo(tracer, a, b, max, state) {
