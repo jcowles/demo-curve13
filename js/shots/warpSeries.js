@@ -131,7 +131,8 @@ proto.setTime = function(time) {
     // the endpoint.
     var posedCurvatureSum = computeCurvatureSum(this.curvatures);
     for (var cIdx=0; cIdx<this.curvatures.length; cIdx++) {
-        this.curvatures[cIdx] += (this.restCurvatureSums[curveAIdx] - posedCurvatureSum) / this.curvatures.length;
+        var desiredCurvatureSum = (1-fracIdx)*this.restCurvatureSums[curveAIdx] + fracIdx*this.restCurvatureSums[curveBIdx];
+        this.curvatures[cIdx] += (desiredCurvatureSum - posedCurvatureSum) / this.curvatures.length;
     }
 
 
