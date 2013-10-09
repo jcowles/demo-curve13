@@ -37,7 +37,7 @@ proto.onPreload = function() {
     //////////////////////
 
     
-    this.warpSeries = new F.WarpSeries(this.camera, [CURVE_HEART, CURVE_ARROW]);
+    this.warpSeries = new F.WarpSeries(this.camera, [CURVE_HEART, CURVE_FLAME, CURVE_ARROW]);
 
     this.warpSeries.settings = this.settings;
 
