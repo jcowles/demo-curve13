@@ -4,11 +4,14 @@ F.WarpSeries = function(camera, curvesList) {
     this.curvesList = curvesList;
     this.curvaturesList = [];
     this.restAngles = [];
+    this.restCurvatureSums = []
 
     for (var i=0; i<this.curvesList.length; i++) {
         c = this.curvesList[i];
-        this.curvaturesList.push(computeCurvatures(c));
+        var curvatures = computeCurvatures(c);
+        this.curvaturesList.push(curvatures);
         this.restAngles.push(computeBaseAngle(c));
+        this.restCurvatureSums.push(computeCurvatureSum(curvatures));
     }
 
     // Init the "current" arrays with the first curve.
@@ -123,6 +126,15 @@ proto.setTime = function(time) {
             *this.settings.sinFrq*2*Math.PI);
     }
 
+    // Enforce that the sum of the perturbed curvature is the same as the
+    // rest curvature sum.  This prevents perturbation-induced discontinuity at
+    // the endpoint.
+    var posedCurvatureSum = computeCurvatureSum(this.curvatures);
+    for (var cIdx=0; cIdx<this.curvatures.length; cIdx++) {
+        this.curvatures[cIdx] += (this.restCurvatureSums[curveAIdx] - posedCurvatureSum) / this.curvatures.length;
+    }
+
+
     // Rebuild tangents from curvatures
     for (var tIdx=1; tIdx<this.tangents.length; tIdx++) {
         var angle = this.curvatures[tIdx];
@@ -174,7 +186,6 @@ proto.setTime = function(time) {
     for (var pIdx=0; pIdx<this.pts.length; pIdx++) {
         this.pts[pIdx].applyMatrix4(originRotMat);
     }
-
 
     // XXX TODO WTF Why do these lines need to be present?
     this.meshWhite.matrix.identity();
@@ -289,6 +300,14 @@ function computeBaseAngle(pts) {
     t.subVectors(pts[Math.floor((pts.length-1)/2)], pts[0]);
     t.normalize();
     return Math.atan2(t.y, t.x);
+}
+
+function computeCurvatureSum(cs) {
+    result = 0.0
+    for (var i=0; i<cs.length; i++) {
+        result += cs[i];
+    }
+    return result;
 }
 
 function smoothStep(t) {

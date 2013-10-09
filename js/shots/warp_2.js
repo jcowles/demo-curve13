@@ -20,7 +20,7 @@ proto.getGui = function() {
     //
     
     var gui = new dat.GUI();
-    gui.add(this.settings, 'sinAmp', 0, 0.2);
+    gui.add(this.settings, 'sinAmp', 0, 1);
     gui.add(this.settings, 'sinFrq', 0, 160);
     gui.add(this.settings, 'sinPhv', 0, 160);
     gui.add(this.settings,"spawnRate",  0, 100);
@@ -37,7 +37,7 @@ proto.onPreload = function() {
     //////////////////////
 
     
-    this.warpSeries = new F.WarpSeries(this.camera, [CURVE_HEART, CURVE_FLAME, CURVE_ARROW]);
+    this.warpSeries = new F.WarpSeries(this.camera, [CURVE_BABE, CURVE_HEART]);
 
     this.warpSeries.settings = this.settings;
 
