@@ -27,7 +27,6 @@ function init() {
     seq = new F.Seq(renderer, document.getElementById("soundtrack"));
 
     // Time units are ms
-    //seq.addShot(new F.Shots.Warp_2(3));
     seq.addShot(new F.Shots.Intro(9.05));
     seq.addShot(new F.Shots.CircleSpline_1(10));
     seq.addShot(new F.Shots.Chase_1(5));
@@ -43,6 +42,10 @@ function init() {
     seq.addShot(new F.Shots.CircleSpline_1(5));
 
     seq.preload();
+
+    // EDIT ME FOR CHOREOGRAPHY PURPOSES.
+    // The number of seconds into the playlist we actually start playback.
+    seq.setOffset(0);
 }
 
 function animate() {

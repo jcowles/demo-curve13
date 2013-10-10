@@ -11,6 +11,7 @@ F.Seq = function(renderer, audio) {
     this.audio = audio;
     this.gui = null;
     this._lastTime = 0;
+    this.offsetSecs = 0;
 };
 
 F.Seq.prototype = {
@@ -23,6 +24,7 @@ F.Seq.prototype = {
             warn("F.Seq cannot play: no shots added");
             return;
         }
+        this.audio.currentTime = this.offsetSecs;
         this.audio.play();
     },
 
@@ -94,6 +96,26 @@ F.Seq.prototype = {
 
     preload: function() {
         this.shots.forEach(function(shot) { shot.onPreload(); });
+    },
+
+    setOffset: function(offsetSecs) {
+        this.offsetSecs = offsetSecs;
+        this._lastTime = offsetSecs;
+        var shotElapsedTime = 0;
+        for (var i=0; i<this.shots.length; i++) {
+            log("HEY "+ i + " " + shotElapsedTime);
+            if ((offsetSecs >= shotElapsedTime) &&
+                (offsetSecs < (shotElapsedTime + this.shots[i].duration))) {
+
+                this.setShot(i);
+
+                log("Starting on shot " + i);
+
+                return;
+            }
+
+            shotElapsedTime += this.shots[i].duration;
+        }
     }
 };
 
