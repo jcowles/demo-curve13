@@ -8,68 +8,81 @@
  */
 F.PlanerRibbonGeometry = function(normal, curveVerts, widths) {
     THREE.Geometry.call(this);
+    this._lookup = [];
     this.update(normal, curveVerts, widths);
 };
 
 F.PlanerRibbonGeometry.prototype = Object.create( THREE.Geometry.prototype );
 
 F.PlanerRibbonGeometry.prototype.update = function(normal, curveVerts, widths, alphaStart, alphaEnd) {
-    alphaStart = Math.max(alphaStart || 0.0, 0.0);
-    alphaEnd = Math.min(alphaEnd || 1.0, 1.0);
+    alphaStart = alphaStart || 0.0;
+    alphaEnd = alphaEnd || 1.0;
+
+    if (alphaStart > 1) alphaStart = alphaStart % 1;
+    if (alphaEnd > 1) alphaEnd = alphaEnd % 1;
 
     if (curveVerts.length < 2) 
         return;
 
+    if (alphaStart != 0 || alphaEnd != 1)
+        this._computeLookup(curveVerts);
+    
     this.dynamic = true;
     //this.buffersNeedUpdate = true;
     this.verticesNeedUpdate = true;
     this.elementsNeedUpdate = true;
     //this.colorsNeedUpdate = true;
-    this.uvsNeedUpdate = true;
-    this.normalsNeedUpdate = true;
+    //this.uvsNeedUpdate = true;
+    //this.normalsNeedUpdate = true;
     //this.tangentsNeedUpdate = true;
     //this.lineDistancesNeedUpdate = true;
 
-    //var start = 1//4;
-    //var end = curveVerts.length - 1;//24 
-    var start = Math.floor((curveVerts.length-1)*alphaStart) + 1;
-    var end = Math.floor(((curveVerts.length-1)*alphaEnd));
-    end = Math.max(start, end);
-    //log("Start: " + start + " end: " + end);
-    //log("a-Start: " + alphaStart + " a-end: " + alphaEnd);
+    var start;
+    var end;
 
-    var vert_i = 0;
     var face_i = 0;
     var uv_i = 0;
 
-    var vert_0 = this._interPoint(curveVerts, alphaStart);
-    var vert_N = this._interPoint(curveVerts, alphaEnd);
+    function _blend(curveVerts, idxMix) {
+        var mix = idxMix % 1;
+        var idx = Math.floor(idxMix);
+        if (mix == 0) return curveVerts[idx];
+        var blended = curveVerts[idx].clone();
+        return blended.lerp(curveVerts[idx+1], mix);
+    }
 
+    var idxMix = this._interPoint(curveVerts, alphaStart);
+    var vert_0 = _blend(curveVerts, idxMix);
+    start = Math.floor(idxMix);
+
+    idxMix = this._interPoint(curveVerts, alphaEnd);
+    var vert_N = _blend(curveVerts, idxMix); 
+    end = Math.ceil(idxMix);
     var max = curveVerts.length-1;
 
     if (alphaStart <= alphaEnd) {
         // this is a normal subset of the curve, nothing fancy needed
-        this._updateVerts(normal, curveVerts, widths, start, end, vert_i, face_i, uv_i, vert_0, vert_N);
+        this._updateVerts(normal, curveVerts, widths, start, end, face_i, uv_i, vert_0, vert_N);        
         // collapse the remaing verts
-        this._collapse(0, Math.max(start-2, 0), start-1);
-        this._collapse(end, curveVerts.length-1, end);
+        this._collapse(0, start-1, start);
+        this._collapse(end+1, curveVerts.length+1, end);
     } else {
         // client has requested to loop around the entire curve, so we need another
         // disjoint set of faces.
     
         // For the first strip, we explicitly pin the end point to the end of the curve
         var temp = vert_N;
-        vert_N = curveVerts[curveVerts.length-1];
-        this._updateVerts(normal, curveVerts, widths, start, end, vert_i, face_i, uv_i, vert_0, vert_N);
+        vert_N = curveVerts[curveVerts.length-1].clone();
+        this._updateVerts(normal, curveVerts, widths, start, curveVerts.length-1, face_i, uv_i, vert_0, vert_N);
 
         // For the second strip, we explicitly pin the start point to the beginning of the curve
         vert_N = temp;
-        vert_0 = curveVerts[0];
-        this._updateVerts(normal, curveVerts, widths, start, end, vert_i, face_i, uv_i, vert_0, vert_N);
+        vert_0 = curveVerts[0].clone();
+        this._updateVerts(normal, curveVerts, widths, curveVerts.length, curveVerts.length+1, face_i, uv_i, vert_0, vert_N);
+        this._collapse(0, start-1, start);
 
         // Since we're inverted, we collapse the points between start and end
-        this._collapse(start, curveVerts.length-1, vert_0);
-        this._collapse(0, end, vert_N);
+        //this._collapse(end+1, start-1, vert_0);
     }
     
     // not sure what this does, seems related to culling
@@ -84,25 +97,105 @@ F.PlanerRibbonGeometry.prototype._collapse = function(startCurveIndex, endCurveI
     }
 }
 
+F.PlanerRibbonGeometry.prototype._interPoint = function(curveVerts, alpha) {
+    if (alpha == 0)
+        return 0;
+    if (alpha == 1)
+        return curveVerts.length - 1;
+
+    if (this._lookup.length == 0) {
+        console.error("No lookup table");
+        return 0;
+    }
+
+    var tbl = this._lookup;
+    var targ = alpha * tbl[tbl.length - 1];
+    var idx = -1;
+
+    for (var i = 0; i < tbl.length; i++) {
+        if (tbl[i] > targ) {
+            idx = i;
+            break;
+        }
+    }
+
+    if (idx == -1) { 
+        console.error("Lookup value (" + targ + ") was too great");
+        log(tbl);
+        log(alpha);
+        return 0;
+    }
+
+    var d = tbl[0];
+    var localTarg = targ;
+
+    if (idx > 0) {
+        // segment length
+        d = tbl[idx] - tbl[idx - 1];
+        localTarg = targ - tbl[idx - 1];
+    }
+
+    var mix = localTarg / d;
+    return idx + mix;
+}
+
+F.PlanerRibbonGeometry.prototype._interPoint_old = function(verts, alpha) {
+    var val = (verts.length-1)*alpha;
+    var p0 = Math.floor(val);
+    var p1 = Math.ceil(val);
+    if (p0 == p1)
+        return verts[p0];
+    var v = new THREE.Vector3();
+    v.copy(verts[p0]);
+    v.lerp(verts[p1], val % 1);
+    return v;
+}
+
+F.PlanerRibbonGeometry.prototype._computeLookup = function(verts) {
+    var me = this;
+    var accum = 0;
+    var lastVert = verts[0].clone();
+    var isFirst = me._lookup.length == 0;
+
+    for (var i = 1; i < verts.length; i++) {
+        accum += lastVert.sub(verts[i]).length();
+
+        if (isFirst)
+            me._lookup.push(accum);
+        else
+            me._lookup[i-1] = accum;
+
+        lastVert.copy(verts[i]);
+    }
+}
+
 F.PlanerRibbonGeometry.prototype._updateVerts = function(normal, curveVerts, 
                                     widths, 
                                     start, end, 
-                                    vert_i, face_i, uv_i, 
+                                    face_i, uv_i, 
                                     vert_0, vert_N) 
 {
+    var genFaces = this.faces.length == 0;
     var width = widths[0];
     var lastGoodCotangent = null;
+
+    function get(index) {
+        if (index == end)
+            return vert_N;
+        if (index == start)
+            return vert_0;
+        return curveVerts[index];
+    }
+
     for(var index = start; index <= end; index++) {
-        var vert = curveVerts[index].clone();
-        //vert.z = 0;
-        var lastVert = curveVerts[index-1].clone();
-        //lastVert.z = 0;
-        
-        if (index == start) {
-            lastVert.copy(vert_0);
-        } 
+        var vert;
+        var nextVert;
+
+        vert = get(index).clone();
         if (index == end) {
-            vert.copy(vert_N);
+            nextVert = get(index-1).clone();
+        } else {
+            nextVert = get(index+1).clone();
         }
 
         if (widths.length > 1) 
@@ -110,7 +203,11 @@ F.PlanerRibbonGeometry.prototype._updateVerts = function(normal, curveVerts,
 
         var tangent = new THREE.Vector3();
 
-        tangent.subVectors(vert, lastVert);
+        if (index == end) {
+            tangent.subVectors(nextVert, vert);
+        } else {
+            tangent.subVectors(vert, nextVert);
+        }
         tangent.normalize();
         
         // construct an ortho-normal basis using the normal and the tangent
@@ -124,67 +221,31 @@ F.PlanerRibbonGeometry.prototype._updateVerts = function(normal, curveVerts,
         var cotangent2 = cotangent1.clone();
 
         var zBump = new THREE.Vector3(0,0,0);
-        // We generate two verts for the previous position on the curve.
-        this._addVert(vert_i, cotangent1.multiplyScalar(width).add(lastVert).add(zBump)); vert_i++;
-        this._addVert(vert_i, cotangent2.multiplyScalar(-width).add(lastVert).add(zBump)); vert_i++;
 
-        if (index > start) {
+        this._addVert(index*2, cotangent1.multiplyScalar(-width).add(vert).add(zBump));
+        this._addVert(index*2+1, cotangent2.multiplyScalar(width).add(vert).add(zBump));
+
+        if (index > start && genFaces) {
             // once we've generated a quad's worth of points, start adding faces
-            this._addFace(face_i, vert_i - 4, vert_i - 3, vert_i - 2, normal); face_i++;
-            this._addFace(face_i, vert_i - 3, vert_i - 1, vert_i - 2, normal); face_i++;
-
-            // XXX: UVs have not been tested!
-            // v1 is the V-coord for the previous vert on the curve
-            // v2 is the V-coord for the current vert on the curve
-            var v2 = (index-2)/(curveVerts.length-1);
-            var v1 = (index-1)/(curveVerts.length-1);
-            this._addUv(uv_i, new THREE.Vector2(0, v2), 
-                              new THREE.Vector2(1, v2),
-                              new THREE.Vector2(0, v1)); uv_i++;
-            this._addUv(uv_i, new THREE.Vector2(1, v2), 
-                              new THREE.Vector2(1, v1),
-                              new THREE.Vector2(0, v1)); uv_i++;
+            var vi = index*2 + 2;
+            this._addFace(face_i, vi - 4, vi - 3, vi - 2, normal); face_i++;
+            this._addFace(face_i, vi - 3, vi - 1, vi - 2, normal); face_i++;
         }
+    }
 
-        if (index == end) {
-            // We generate two verts for the last vert on the curve, using the
-            // same tangent and width (since we can't calculate a cotangent
-            // for the last vert).
-            cotangent1 = cotangentOrig.clone();
-            cotangent2 = cotangentOrig.clone();
-            this._addVert(vert_i, cotangent1.multiplyScalar(width).add(vert).add(zBump)); vert_i++;
-            this._addVert(vert_i, cotangent2.multiplyScalar(-width).add(vert).add(zBump)); vert_i++;
-
-            this._addFace(face_i, vert_i - 4, vert_i - 3, vert_i - 2, normal); face_i++;
-            this._addFace(face_i, vert_i - 3, vert_i - 1, vert_i - 2, normal); face_i++;
-                            
-            // XXX: UVs have not been tested!
-            // v1 is the V-coord for the last vert on the curve
-            // v2 is the V-coord for the last-1 vert on the curve
-            var v2 = (index-1)/(curveVerts.length-1);
-            var v1 = (index)/(curveVerts.length-1);
-            this._addUv(uv_i, new THREE.Vector2(0, v1), 
-                              new THREE.Vector2(1, v1),
-                              new THREE.Vector2(0, v2)); uv_i++;
-            this._addUv(uv_i,new THREE.Vector2(1, v1), 
-                             new THREE.Vector2(1, v2),
-                             new THREE.Vector2(0, v2)); uv_i++;
-        }
+    // Add one last quad, for wrapping
+    if (genFaces) {
+        this._addVert(index*2, cotangent1.clone().multiplyScalar(-width).add(vert).add(zBump));
+        this._addVert(index*2+1, cotangent2.clone().multiplyScalar(width).add(vert).add(zBump));
+        index++;
+        this._addVert(index*2, cotangent1.clone().multiplyScalar(-width).add(vert).add(zBump));
+        this._addVert(index*2+1, cotangent2.clone().multiplyScalar(width).add(vert).add(zBump));
+        vi = index*2+2;
+        this._addFace(face_i, vi - 4, vi - 3, vi - 2, normal); face_i++;
+        this._addFace(face_i, vi - 3, vi - 1, vi - 2, normal); face_i++;
     }
 };
 
-
-F.PlanerRibbonGeometry.prototype._interPoint = function(verts, alpha) {
-    var val = (verts.length-1)*alpha;
-    var p0 = Math.floor(val);
-    var p1 = Math.ceil(val);
-    if (p0 == p1)
-        return verts[p0];
-    var v = new THREE.Vector3();
-    v.copy(verts[p0]);
-    v.lerp(verts[p1], val % 1);
-    return v;
-}
 
 //
 // In-place updates to avoid thrashing the garbage collector.
