@@ -27,19 +27,30 @@ function init() {
     seq = new F.Seq(renderer, document.getElementById("soundtrack"));
 
     // Time units are ms
-    seq.addShot(new F.Shots.Intro(9.05));
-    seq.addShot(new F.Shots.CircleSpline_1(10));
-    seq.addShot(new F.Shots.Chase_1(5));
-    seq.addShot(new F.Shots.Warp_2(5));
-    seq.addShot(new F.Shots.CircleSpline_5(2));
-    seq.addShot(new F.Shots.Warp_2(2));
-    seq.addShot(new F.Shots.CircleSpline_3(10));
-    seq.addShot(new F.Shots.Warp_2(2));
-    seq.addShot(new F.Shots.CircleSpline_4(4));
-    seq.addShot(new F.Shots.Warp_2(2));
-    seq.addShot(new F.Shots.CircleSpline_2(5));
-    seq.addShot(new F.Shots.Warp_2(2));
-    seq.addShot(new F.Shots.CircleSpline_1(5));
+    seq.addShots([
+        [new F.Shots.CircleSpline_1(), 0],
+        [new F.Shots.Chase_1(), 9.23],
+        [new F.Shots.Intro(), 22.2],
+        [new F.Shots.Chase_1(), 28.5],
+        [new F.Shots.Intro(), 35.0],
+        [new F.Shots.Chase_1(), 46.2],
+        [new F.Shots.Intro(), 52.5],
+        [new F.Shots.Chase_1(), 59.0],
+        [new F.Shots.Intro(), 65.27],
+
+        [new F.Shots.Chase_1(), 71.8],
+        [new F.Shots.Intro(), 73.4],
+        [new F.Shots.Chase_1(), 75.0],
+        [new F.Shots.Intro(), 76.6],
+        [new F.Shots.Chase_1(), 78.2],
+        [new F.Shots.Intro(), 93.7],
+
+        [new F.Shots.Chase_1(), 97.0],
+        [new F.Shots.Intro(), 100.1],
+        [new F.Shots.Chase_1(), 103.2],
+        [new F.Shots.Intro(), 106.4],
+        [new F.Shots.Chase_1(), 113.1],
+        ]);
 
     seq.preload();
 

@@ -7,15 +7,13 @@ F.Shots = {};
 //
 // The Shot base class
 //
-F.Shot = function(name, duration) {
+F.Shot = function(name) {
     log("Shots Fired: " + name);
     this.name = name;
 
-    // The world time when the shot started, set by the renderer
+    // The world time when the shot is supposed to start, set by the user
+    // and later reset by the sequence when the shot really does start.
     this.startTime = 0;
-
-    // How long the shot will play for, set by the user
-    this.duration = duration;
 
     // (worldTime - startTime) / duration
     this.progress = 0;

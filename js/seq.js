@@ -48,7 +48,8 @@ F.Seq.prototype = {
         // Setup the new shot
         this.shotIndex = index;
         curShot = this.shots[this.shotIndex];
-        curShot.startTime = this.getTime();
+        // This overwrites the ideal start time with the actual start time.
+        curShot.startTime = this.getTime(); 
         curShot.onBegin();
         if (this.gui)
             this.gui.destroy();
@@ -72,8 +73,9 @@ F.Seq.prototype = {
         // Is this the last shot?
         if (this.shotIndex < this.shots.length - 1) {
             curShot = this.shots[this.shotIndex];
-            shotTime = this.getTime() - curShot.startTime;
-            if (shotTime >= curShot.duration) {
+            nextShot = this.shots[this.shotIndex+1];
+
+            if (this.getTime() >= nextShot.startTime) {
                 this.setShot(this.shotIndex+1);
             }
         }
@@ -91,9 +93,24 @@ F.Seq.prototype = {
         }
     },
 
-    addShot: function(shot) {
-        shot.seq = this;
-        this.shots.push(shot);
+    addShots: function(shotEditList) {
+        for (var i=0; i<shotEditList.length; i++) {
+            shotEdit = shotEditList[i];
+
+            shot = shotEdit[0];
+            shot.startTime = shotEdit[1];
+
+            if (i==shotEditList.length-1) {
+                // It's the last shot, which runs til the song is over.
+                shot.duration = this.audio.duration - shot.startTime;    
+            } else {
+                // It's not the last shot, so it runs til the next shot starts.
+                shot.duration = shotEditList[i+1][1] - shot.startTime;
+            }
+            
+            shot.seq = this;
+            this.shots.push(shot);
+        }
     },
 
     preload: function() {
@@ -103,11 +120,11 @@ F.Seq.prototype = {
     setOffset: function(offsetSecs) {
         this.offsetSecs = offsetSecs;
         this._lastTime = offsetSecs;
-        var shotElapsedTime = 0;
+        var shotsElapsedTime = 0;
         for (var i=0; i<this.shots.length; i++) {
-            log("HEY "+ i + " " + shotElapsedTime);
-            if ((offsetSecs >= shotElapsedTime) &&
-                (offsetSecs < (shotElapsedTime + this.shots[i].duration))) {
+            log("HEY "+ i + " " + shotsElapsedTime);
+            if ((offsetSecs >= shotsElapsedTime) &&
+                (offsetSecs < (shotsElapsedTime + this.shots[i].duration))) {
 
                 this.setShot(i);
 
@@ -116,7 +133,7 @@ F.Seq.prototype = {
                 return;
             }
 
-            shotElapsedTime += this.shots[i].duration;
+            shotsElapsedTime += this.shots[i].duration;
         }
     }
 };
