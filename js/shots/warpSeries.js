@@ -68,6 +68,8 @@ F.WarpSeries = function(curvesList) {
     this.restAngles = [];
     this.restCurvatureSums = [];
     this.restEdgeLens = [];
+    this.lastKnownMatrix = new THREE.Matrix4();
+
 
     for (var i=0; i<this.numCurves; i++) {
         c = curvesList[i];
@@ -243,6 +245,7 @@ proto.setTime = function(time) {
         this.pts[pIdx].applyMatrix4(originRotMat);
     }
 
+    this.lastKnownMatrix.copy(this.meshColored.matrix);
     // XXX TODO WTF Why do these lines need to be present?
     this.meshWhite.matrix.identity();
     this.meshWhite.applyMatrix(new THREE.Matrix4());
@@ -259,12 +262,17 @@ proto.setTime = function(time) {
     // "Spawn" a certain number of particles by resetting the
     // next few particles to be randomly positioned on the 
     // curve.
+    //
+    // The particles are in a separate space not oriented to the
+    // curves.  So spawn them at the curve points, at the last
+    // known good transform (sorry, hack)
 
     for (var i=0; i<this.settings.spawnRate; i++) {
         var sparkIdx = this.nextSpawnIdx;
         var pIdx = Math.floor(Math.random()*this.pts.length-1);
         var spark = this.geometrySparks.vertices[sparkIdx];
         spark.copy(this.pts[pIdx]);
+        spark.applyMatrix4(this.lastKnownMatrix)
 
         this.nextSpawnIdx = (this.nextSpawnIdx+1) % this.geometrySparks.vertices.length;
     }

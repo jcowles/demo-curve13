@@ -6,10 +6,10 @@ F.Shots.Warp_3 = function(duration, filenameA, filenameB) {
     this.settings = new (function() {
         this.sinAmp = 0.01;
         this.sinFrq = 12;
-        this.sinPhv = 160;
+        this.sinPhv = 16;
         this.spawnRate = 0;
-        this.cornerAmp = 8.2;
-        this.cornerNum = 9;
+        this.cornerAmp = 0;
+        this.cornerNum = 0;
     })();
 
 };
@@ -44,13 +44,14 @@ proto.onPreload = function() {
 
     
     this.warpSeriesSet = new F.WarpSeriesSet(this.camera, [
-        new F.WarpSeries([CURVE_HEART]),
         new F.WarpSeries([CURVE_ARROW]),
         ]);
 
     for (var i = 0; i < this.warpSeriesSet.seriesList.length; i++) {
         this.warpSeriesSet.seriesList[i].settings = this.settings;
     };
+
+    this.warpSeriesSet.seriesList[0].setColor(new THREE.Color(0xAAAAFF));
 
     this.composer = this.warpSeriesSet.composer;
 
@@ -61,12 +62,33 @@ proto.onPreload = function() {
 
 proto.onDraw = function(time, dt) {
 
-    renderer.setClearColor(0, 1);
-
-    this.warpSeriesSet.seriesList[0].setColor(new THREE.Color(0x0000FF));
+    var black = new THREE.Color(0x000033);
+    renderer.setClearColor(black, 1);
 
     // XXX Do a more complicated mapping here
     this.warpSeriesSet.setTime(this.progress);
+
+    var y = linMap(0,1,  1,-1.5,this.progress) +
+        0.1*Math.sin(this.progress*40)
+        ;
+
+    var x = -1 + lerp(this.progress, 0, 1) + 0.1*Math.sin(this.progress*40);
+
+    ///
+    warp = this.warpSeriesSet.seriesList[0];
+    warp.setPos(new THREE.Vector3(x, y, 0));
+
+
+    var color = new THREE.Color(0xAAAAFF);
+    var gray = new THREE.Color(0xAAAAAA);
+
+    color.lerp(gray, Math.sin(this.progress*40)+1);
+    color.lerp(black, this.progress);
+    warp.setColor(color);
+
+    warp.setRot(10 + lerp(this.progress,0,20) + (Math.sin(this.progress*40)+1)*3 );
+
+    this.warpSeriesSet.setNeon(0);
 }
 
 proto._initWarp = function() {
