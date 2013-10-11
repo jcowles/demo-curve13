@@ -17,6 +17,7 @@ F.Shots.Warp_1 = function(duration, filenameA, filenameB) {
 proto = Object.create(F.Shot.prototype);
 
 proto.getGui = function() {
+/*
     //
     // GUI Init
     //
@@ -29,6 +30,7 @@ proto.getGui = function() {
     gui.add(this.settings,"cornerAmp", 7,9.1);
     gui.add(this.settings,"cornerNum", 8,12.1);
     return gui;
+*/
 }
 
 proto.onPreload = function() {

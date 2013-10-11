@@ -17,18 +17,18 @@ F.Shots.Warp_2 = function(duration, filenameA, filenameB) {
 proto = Object.create(F.Shot.prototype);
 
 proto.getGui = function() {
-    //
-    // GUI Init
-    //
-    
-    var gui = new dat.GUI();
-    gui.add(this.settings, 'sinAmp', 0, 1.1);
-    gui.add(this.settings, 'sinFrq', 0, 160.1);
-    gui.add(this.settings, 'sinPhv', 0, 160.1);
-    gui.add(this.settings,"spawnRate",  0, 100.1);
-    gui.add(this.settings,"cornerAmp", 7,9.1);
-    gui.add(this.settings,"cornerNum", 8,12.1);
-    return gui;
+//     //
+//     // GUI Init
+//     //
+//     
+//     var gui = new dat.GUI();
+//     gui.add(this.settings, 'sinAmp', 0, 1.1);
+//     gui.add(this.settings, 'sinFrq', 0, 160.1);
+//     gui.add(this.settings, 'sinPhv', 0, 160.1);
+//     gui.add(this.settings,"spawnRate",  0, 100.1);
+//     gui.add(this.settings,"cornerAmp", 7,9.1);
+//     gui.add(this.settings,"cornerNum", 8,12.1);
+//     return gui;
 }
 
 proto.onPreload = function() {
