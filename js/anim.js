@@ -6,6 +6,13 @@ function lerp(t, a, b) {
 	return (1-t)*a + t*b;
 }
 
+function vlerp(t, a, b) {
+	r = new THREE.Vector3();
+	r.copy(a);
+	r.lerp(b,t);
+	return r;
+}
+
 function linMap(t0, t1, v0, v1, t) {
 	if (t<=t0) {
 		return v0;

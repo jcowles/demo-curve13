@@ -1,11 +1,73 @@
-F.WarpSeries = function(camera, curvesList) {
-
+F.WarpSeriesSet = function(camera, seriesList) {
     this.camera = camera;
+    this.seriesList = seriesList;
+
+    //////////////////////
+
+    // Set up two scenes, with distinct meshes, each mesh pair sharing the same geometry
+    // but different material.
+    this.sceneColored = new THREE.Scene();
+    this.sceneWhite = new THREE.Scene();
+    this.sceneSparks = new THREE.Scene();
+
+    for (var i = 0; i < this.seriesList.length; i++) {
+
+        var s = this.seriesList[i];
+
+        this.sceneColored.add( s.meshColored );
+        this.sceneWhite.add( s.meshWhite );
+        this.sceneSparks.add(s.sparks);
+
+    };
+
+    this.composer = new THREE.EffectComposer( renderer );
+
+    var renderModel = new THREE.RenderPass(this.sceneColored, this.camera);
+    this.composer.addPass( renderModel ); // render to buffer1
+
+    this.effectBloom = new THREE.BloomPass(2.3, 25, 4.0, 512);
+    this.composer.addPass( this.effectBloom ); // render to internal buffers, finally to buffer1
+
+    var renderSparks = new THREE.RenderPass(this.sceneSparks, this.camera);
+    renderSparks.clear = false;
+    this.composer.addPass(renderSparks); // render to buffer1
+
+    var renderModelWhite = new THREE.RenderPass(this.sceneWhite, this.camera);
+    renderModelWhite.clear = false;
+    this.composer.addPass(renderModelWhite); // render to buffer1
+    
+    var effectCopy = new THREE.ShaderPass(THREE.CopyShader);
+    effectCopy.renderToScreen = true;
+    this.composer.addPass( effectCopy ); // render to screen
+};
+
+proto = Object.create(F.WarpSeriesSet.prototype);
+
+proto.setTime = function(time) {
+    for (var i = 0; i < this.seriesList.length; i++) {
+        this.seriesList[i].setTime(time);
+    }
+}
+
+proto.setNeon = function(amount) {
+    for (var i = 0; i < this.seriesList.length; i++) {
+        this.seriesList[i].setNeon(amount);
+    }
+    this.effectBloom.copyUniforms["opacity"].value = lerp(amount, 0, 2.3);
+}
+
+
+F.WarpSeriesSet.prototype = proto;
+delete proto;
+
+///////////////////////////////////////////////////////////////////////////////
+
+F.WarpSeries = function(curvesList) {
     this.numCurves = curvesList.length;
     this.curvaturesList = [];
     this.restAngles = [];
-    this.restCurvatureSums = []
-    this.restEdgeLens = []
+    this.restCurvatureSums = [];
+    this.restEdgeLens = [];
 
     for (var i=0; i<this.numCurves; i++) {
         c = curvesList[i];
@@ -23,13 +85,6 @@ F.WarpSeries = function(camera, curvesList) {
 
     //////////////////////
 
-    // Set up two scenes, with 2 distinct meshes, each mesh sharing the same geometry
-    // but different material.
-    // XXX TODO Replace this with usage of render pass's overrideMaterial.
-
-    this.sceneColored = new THREE.Scene();
-    this.sceneWhite = new THREE.Scene();
-
     this.geometry = new F.PlanerRibbonGeometry(
         new THREE.Vector3(0,0,1),
         this.pts,
@@ -39,14 +94,10 @@ F.WarpSeries = function(camera, curvesList) {
 
     var matColored = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: false } );
     this.meshColored = new THREE.Mesh( this.geometry, matColored );
-    this.meshColored.scale.x = this.meshColored.scale.y = 400;
-    this.sceneColored.add( this.meshColored );
 
     var matWhite = new THREE.MeshBasicMaterial( { color: 0xffffff, wireframe: false } );
     matWhite.depthTest = false;
     this.meshWhite = new THREE.Mesh( this.geometry, matWhite );
-    this.meshWhite.scale.copy(this.meshColored.scale);
-    this.sceneWhite.add( this.meshWhite );
 
     //////////////////////
 
@@ -54,7 +105,6 @@ F.WarpSeries = function(camera, curvesList) {
 
     this.nextSpawnIdx = 0;
 
-    this.sceneSparks = new THREE.Scene();
     this.geometrySparks = new THREE.Geometry();
     this.numSparks = 1000;
     for (var i=0; i<this.numSparks; i++) {
@@ -68,31 +118,6 @@ F.WarpSeries = function(camera, curvesList) {
     matSparks.depthTest = false;
     matSparks.vertexColors = THREE.VertexColors;
     this.sparks = new THREE.ParticleSystem(this.geometrySparks, matSparks);
-    this.sceneSparks.add(this.sparks);
-    var renderSparks = new THREE.RenderPass(this.sceneSparks, this.camera);
-    renderSparks.clear = false;
-
-    //////////////////////
-
-    this.composer = new THREE.EffectComposer( renderer );
-    
-    var renderModel = new THREE.RenderPass(this.sceneColored, this.camera);
-    this.composer.addPass( renderModel ); // render to buffer1
-
-    var effectBloom = new THREE.BloomPass(2.3, 25, 4.0, 512);
-    this.composer.addPass( effectBloom ); // render to internal buffers, finally to buffer1
-
-    this.composer.addPass(renderSparks); // render to buffer1
-
-    var renderModelWhite = new THREE.RenderPass(this.sceneWhite, this.camera);
-    renderModelWhite.clear = false;
-    this.composer.addPass(renderModelWhite); // render to buffer1
-    
-    var effectCopy = new THREE.ShaderPass(THREE.CopyShader);
-    effectCopy.renderToScreen = true;
-    this.composer.addPass( effectCopy ); // render to screen
-
-    this.progress = 0;
 };
 
 proto = Object.create(F.WarpSeries.prototype);
@@ -100,6 +125,22 @@ proto = Object.create(F.WarpSeries.prototype);
 proto.setColor = function(color) {
     this.meshColored.material.color.copy(color);
     this.meshColored.material.needsUpdate = true;
+}
+
+proto.setPos = function(pos) {
+    this.meshColored.position.copy(pos);
+    this.meshWhite.position.copy(pos);
+}
+
+proto.setRot = function(angle) {
+    angle = angle / 180 * Math.PI;
+    this.meshColored.rotation.z = angle;
+    this.meshWhite.rotation.z = angle;
+}
+
+proto.setNeon = function(amount) {
+    this.meshWhite.material.color.copy(new THREE.Color(0xFFFFFF));
+    this.meshWhite.material.color.lerp(this.meshColored.material.color, 1-amount)
 }
 
 proto.setTime = function(time) {
@@ -111,8 +152,6 @@ proto.setTime = function(time) {
     var curveBIdx = Math.min(curveAIdx+1, this.numCurves-1);
     var fracIdx = floatIdx - curveAIdx;
     fracIdx = smoothStep(fracIdx);
-
-    //log(this.curvaturesList.length + " " + curveAIdx + " " + curveBIdx + " " + fracIdx);
 
     // Lerp curvatures according to time
     for (var cIdx=0; cIdx<this.curvatures.length; cIdx++) {
