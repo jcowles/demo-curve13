@@ -55,8 +55,6 @@ proto.onDraw = function(time, dt) {
         }
     }
 
-
-
     renderer.setClearColor(CircleSplineBg, 1);
 
     this.camera.position.x = -200 + this.progress*-1300; //this.settings.camX;
