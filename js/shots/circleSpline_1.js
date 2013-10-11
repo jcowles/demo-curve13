@@ -1,5 +1,15 @@
 // The Shots class is declared in shot.js
 
+/*
+CircleSplineBg = 0xFFFFFF;
+csLineA = 0x30D6FF;
+csLineB = 0x333333;
+*/
+CircleSplineBg = 0x000000;
+csLineA = 0x30D6FF;
+csLineB = 0xFFFFFF;
+
+
 F.Shots.CircleSpline_1 = function(duration) {
     F.Shot.call(this, "CircleSpline_1", duration);
     this.lineGroup = null;
@@ -7,9 +17,10 @@ F.Shots.CircleSpline_1 = function(duration) {
     this.mat = null;
     this.ribbon = null;
     this.ribbons = [];
+    this.points = [];
     this.origin  = new THREE.Vector2(100, -400);
     this.size = 200;
-    this.tracer = new F.ArcTracer();
+    this.tracer = new this.ArcTracer();
 
     this.settings = new (function() {
         this.rotateX = -.5;
@@ -25,7 +36,7 @@ proto = Object.create(F.Shot.prototype);
 
 proto.onDraw = function(time, dt) {
     var me = this;
-    renderer.setClearColor(0, 1);
+    renderer.setClearColor(CircleSplineBg, 1);
 
     this.camera.position.x = this.settings.camX;
     this.camera.position.y = this.settings.camY;
@@ -53,16 +64,18 @@ proto.onDraw = function(time, dt) {
         }
         
         ribbonMesh.visible = true;
-        me.tracer.reset(me.origin, me.size, ribbonMesh.ribbonOffset)
-        me.tracer.iterations = 20;
+        //me.tracer.reset(me.origin, me.size, ribbonMesh.ribbonOffset)
+        //me.tracer.iterations = 20;
 
         t = (time - ribbonMesh.ribbonOffset) + Math.sin(me.progress * 2*Math.PI) * 100;
         if (t < 0) t = 0.001;
-        me.arcDriver(me.tracer, t);
+        //me.arcDriver(me.tracer, t);
         
         ribbonMesh.geometry.update(normal, 
-                                 me.tracer.points, 
-                                 [2.8]);
+                                 me.points[index], //me.tracer.points, 
+                                 [2.8],
+                                 me.progress*.5,
+                                 me.progress);
         ribbonMesh.frustumCulled = false;
 
     });
@@ -71,7 +84,7 @@ proto.onDraw = function(time, dt) {
     //this.camera.position.y = lastVert.y;
 }
 
-function foo(tracer, a, b, max, state) {
+proto.foo = function(tracer, a, b, max, state) {
     if (state.angle < max) {
         tracer.arc(a,b,state.angle,state.lock);
         state.lock = true;
@@ -86,18 +99,18 @@ proto.arcDriver = function (tracer, angle) {
     var state = { lock: false,
               angle: angle };
 
-    foo(tracer,0,0,90,state);
-    foo(tracer,0,1,90,state);
-    foo(tracer,-1,0,90,state);
-    foo(tracer,0,0,90,state);
-    foo(tracer,0,0,90,state);
-    foo(tracer,0,-1,90,state);
-    foo(tracer,0,0,90,state);
-    foo(tracer,0,0,90,state);
-    foo(tracer,0,0,90,state);
-    foo(tracer,0,0,90,state);
-    foo(tracer,1,0,90,state);
-    foo(tracer,0,0,90,state);
+    this.foo(tracer,0,0,90,state);
+    this.foo(tracer,0,1,90,state);
+    this.foo(tracer,-1,0,90,state);
+    this.foo(tracer,0,0,90,state);
+    this.foo(tracer,0,0,90,state);
+    this.foo(tracer,0,-1,90,state);
+    this.foo(tracer,0,0,90,state);
+    this.foo(tracer,0,0,90,state);
+    this.foo(tracer,0,0,90,state);
+    this.foo(tracer,0,0,90,state);
+    this.foo(tracer,1,0,90,state);
+    this.foo(tracer,0,0,90,state);
 }
 
 
@@ -145,14 +158,14 @@ proto.onPreload = function() {
     var tracer = null;
 
     for (var i = 0; i < count; i++) {
-        tracer = new F.ArcTracer(this.origin, this.size, offset);
+        tracer = new this.ArcTracer(this.origin, this.size, offset);
         tracer.iterations = 20;
-        //arcDriver(tracer, 0);
+        this.arcDriver(tracer, 90*12);
 
         flipColor = !flipColor;
 
         var mat = new THREE.MeshBasicMaterial( { opacity: 1.0, 
-                                                color: flipColor ? 0x30D6FF : 0xFFFFFF,
+                                                color: flipColor ? csLineA : csLineB,
                                                 //vertexColors: THREE.VertexColors, 
                                                 //wireframe: true 
                                                 } ); 
@@ -160,6 +173,7 @@ proto.onPreload = function() {
         var geoRibbon = new F.PlanerRibbonGeometry(new THREE.Vector3(0,0,1), 
                                  tracer.points, 
                                  [2.8]);
+        this.points.push(tracer.points);
         /*
         geoRibbon.vertices.forEach(function(vert, j) {
             color = new THREE.Color( 0xff00ff );
@@ -192,14 +206,10 @@ proto.onPreload = function() {
     this.scene.add(this.lineGroup);
 }
 
-F.Shots.CircleSpline_1.prototype = proto;
-delete proto;
 
+proto.ArcTracer = function (origin, size, offset) {
 
-// helper functions
-var DegToRad = (Math.PI/180);
-
-F.ArcTracer = function (origin, size, offset) {
+    var DegToRad = (Math.PI/180);
 
     this.reset = function(origin, size, offset) {
         this.origin = origin; 
@@ -233,7 +243,6 @@ F.ArcTracer = function (origin, size, offset) {
             return;
         }
 
-        //log(sweepDeg);
         var sweepRad = sweepDeg * DegToRad; 
         
         if (xAdj != 0) {
@@ -257,14 +266,15 @@ F.ArcTracer = function (origin, size, offset) {
             var nextPoint = new THREE.Vector3(
                                 this.origin.x + (this.xLoc*2*this.size) + size*Math.cos(this.xAngle+(i*dtheta)), 
                                 this.origin.y + (this.yLoc*2*this.size) + size*Math.sin(this.yAngle+(i*dtheta)), 
-                                10-Math.sin(2*Math.PI*this.t+5));
+                                10*Math.sin(2*Math.PI*this.t/229));
             this.points.push(nextPoint);
         }
-
-        //log(this.points[this.points.length-1])
 
         this.xAngle += sweepRad;
         this.yAngle += sweepRad;
     }
 };
 
+
+F.Shots.CircleSpline_1.prototype = proto;
+delete proto;

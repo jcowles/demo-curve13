@@ -24,8 +24,8 @@ F.Shots.CircleSpline_5 = function(duration) {
 proto = Object.create(F.Shot.prototype);
 
 proto.onDraw = function(time, dt) {
-    var me = this;
     renderer.setClearColor(0, 1);
+    var me = this;
 
     this.camera.position.x = this.settings.camX;
     this.camera.position.y = this.settings.camY;

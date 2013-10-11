@@ -15,6 +15,7 @@ F.Shots.CircleSpline_2 = function(duration) {
 proto = Object.create(F.Shot.prototype);
 
 proto.onDraw = function(time, dt) {
+    renderer.setClearColor(CircleSplineBg, 1);
     this.camera.position.x += Math.sin(time);
     this.camera.position.z += 10*Math.cos(time);
     this.lineGroup.rotation.x += this.settings.rotateX;
@@ -52,9 +53,9 @@ proto.onPreload = function() {
 
     var points = [];
     var origin  = new THREE.Vector2(100, -400);
-    var material = new THREE.LineBasicMaterial( { color: 0xffffff, opacity: 1, linewidth: 3, vertexColors: THREE.VertexColors } );
+    var material = new THREE.LineBasicMaterial( { color: csLineB, opacity: 1, linewidth: 3, vertexColors: THREE.VertexColors } );
 
-    var count = 70;
+    var count = 40;
     var size = 200;
     var offsetStep = 5;
     var offset = -1 * offsetStep * Math.floor(count/2);
@@ -85,7 +86,7 @@ proto.onPreload = function() {
 
         for (j = 0; j < points.length; j ++) {
             geometry.vertices.push(points[j]);
-            colors[j] = new THREE.Color( 0xffffff );
+            colors[j] = new THREE.Color( csLineB );
             if (flipColor)
                 colors[j].setHSL(0.6, 1.0, Math.max(0, ( 200 - points[j].z ) / 400) * 0.5 + 0.5);
         }
