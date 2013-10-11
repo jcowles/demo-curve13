@@ -26,7 +26,6 @@ F.Shots.CircleSpline_4 = function(duration) {
     this.seperator = new OnBeat(
                 [9.5, 10.32, 11.13, 11.9, 12.6, 13.4, 14.29],
                 function(time) {
-                    log("hit: " + time)
                     me.rgb.uniforms[ 'amount' ].value = .09*Math.sin(100*Math.sin(time*10)*Math.sin(time*2));
                 },
                 function(time) {
@@ -191,15 +190,11 @@ proto.onPreload = function() {
     // Setup composer
     //
     this.composer = Circ.GetComposer(renderer, this.scene, this.camera);
-    this.composer.vignette.renderToScreen = true;
 
     this.rgb = new THREE.ShaderPass( THREE.RGBShiftShader );
     this.rgb.uniforms[ 'amount' ].value = 0.0;
     this.rgb.renderToScreen = true;
     this.composer.addPass( this.rgb );
-
-    /*
-    */
 
     //
     // Add some geometry
