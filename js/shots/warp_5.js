@@ -55,7 +55,7 @@ proto.onDraw = function(time, dt) {
     // XXX Do a more complicated mapping here
     this.warpSeriesSet.setTime(this.progress);
 
-    boy = this.warpSeriesSet.seriesList[0];
+    var boy = this.warpSeriesSet.seriesList[0];
     
     boy.setRot(0);
     boy.setPos(new THREE.Vector3(0, 0, 0));

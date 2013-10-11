@@ -63,19 +63,19 @@ delete proto;
 ///////////////////////////////////////////////////////////////////////////////
 
 F.WarpSeries = function(curvesList) {
+    this.curvesList = curvesList;
     this.numCurves = curvesList.length;
     this.curvaturesList = [];
-    this.restAngles = [];
     this.restCurvatureSums = [];
     this.restEdgeLens = [];
     this.lastKnownMatrix = new THREE.Matrix4();
 
+    this.refIdx = 500;
 
     for (var i=0; i<this.numCurves; i++) {
         c = curvesList[i];
         curvatures = computeCurvatures(c);
         this.curvaturesList.push(curvatures);
-        this.restAngles.push(computeBaseAngle(c));
         this.restCurvatureSums.push(computeCurvatureSum(curvatures));
         this.restEdgeLens.push(computeEdgeLen(c));
     }
@@ -237,8 +237,10 @@ proto.setTime = function(time) {
     // Consider new point positions and rotate them about p0 so that
     // p0 -> p(n/2) matches the desired orientation.  This accounts for
     // the arbitrary rotations that arbitrary curvature operations cause.
-    var currentAngle = computeBaseAngle(this.pts);
-    var desiredAngle = (1-fracIdx)*this.restAngles[curveAIdx] + fracIdx*this.restAngles[curveBIdx];
+    var restAngleA = computeBaseAngle(this.curvesList[curveAIdx], this.refIdx);
+    var restAngleB = computeBaseAngle(this.curvesList[curveBIdx], this.refIdx);
+    var currentAngle = computeBaseAngle(this.pts, this.refIdx);
+    var desiredAngle = (1-fracIdx)*restAngleA + fracIdx*restAngleB;
     var originRotMat = new THREE.Matrix4();
     originRotMat.makeRotationZ(desiredAngle - currentAngle);
     for (var pIdx=0; pIdx<this.pts.length; pIdx++) {
@@ -388,10 +390,11 @@ function computeBaseAngle2(pts) {
 }
 */
 
-function computeBaseAngle(pts) {
+function computeBaseAngle(pts, refIdx) {
     var t = new THREE.Vector3();
-    t.subVectors(pts[500], pts[0]);
+    t.subVectors(pts[refIdx], pts[0]);
     t.normalize();
+    log(pts[refIdx]);
     return Math.atan2(t.y, t.x);
 }
 

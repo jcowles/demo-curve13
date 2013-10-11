@@ -2,33 +2,11 @@
 
 F.Shots.Warp_6 = function(duration, filenameA, filenameB) {
     F.Shot.call(this, "Warp_6", duration);
-
-    this.settings = new (function() {
-        this.sinAmp = 0.01;
-        this.sinFrq = 12;
-        this.sinPhv = 16;
-        this.spawnRate = 0;
-        this.cornerAmp = 0;
-        this.cornerNum = 0;
-    })();
-
 };
 
 proto = Object.create(F.Shot.prototype);
 
 proto.getGui = function() {
-    //
-    // GUI Init
-    //
-    
-    var gui = new dat.GUI();
-    gui.add(this.settings, 'sinAmp', 0, 1.1);
-    gui.add(this.settings, 'sinFrq', 0, 160.1);
-    gui.add(this.settings, 'sinPhv', 0, 160.1);
-    gui.add(this.settings,"spawnRate",  0, 100.1);
-    gui.add(this.settings,"cornerAmp", 7,9.1);
-    gui.add(this.settings,"cornerNum", 8,12.1);
-    return gui;
 }
 
 proto.onPreload = function() {
@@ -44,14 +22,21 @@ proto.onPreload = function() {
 
     
     this.warpSeriesSet = new F.WarpSeriesSet(this.camera, [
-        new F.WarpSeries([CURVE_ARROW]),
+        new F.WarpSeries([CURVE_BABE]),
         ]);
 
-    for (var i = 0; i < this.warpSeriesSet.seriesList.length; i++) {
-        this.warpSeriesSet.seriesList[i].settings = this.settings;
-    };
+    this.warpSeriesSet.seriesList[0].settings = new (function() {
+        this.sinAmp = 0.3;
+        this.sinFrq = 30;
+        this.sinPhv = 8;
+        this.spawnRate = 0;
+        this.cornerAmp = 0;
+        this.cornerNum = 0;
+        })();
 
-    this.warpSeriesSet.seriesList[0].setColor(new THREE.Color(0xAAAAFF));
+    this.warpSeriesSet.seriesList[0].setColor(new THREE.Color(0xFF00FF));
+
+    this.warpSeriesSet.setNeon(1);
 
     this.composer = this.warpSeriesSet.composer;
 
@@ -62,33 +47,35 @@ proto.onPreload = function() {
 
 proto.onDraw = function(time, dt) {
 
-    var black = new THREE.Color(0x000033);
-    renderer.setClearColor(black, 1);
+    renderer.setClearColor(0, 1);
+
+    //this.camera.rotation.z = lerp(this.progress, 0, 6);
+    this.camera.position.z = lerp(this.progress, 2, 1.5);
 
     // XXX Do a more complicated mapping here
     this.warpSeriesSet.setTime(this.progress);
 
-    var y = linMap(0,1,  1,-1.5,this.progress) +
-        0.1*Math.sin(this.progress*40)
-        ;
+    var girl = this.warpSeriesSet.seriesList[0];
+    
+    girl.setRot(0);
+    girl.setPos(new THREE.Vector3(0, -0.2, 0));
+    girl.setSize(1.5);
 
-    var x = -1 + lerp(this.progress, 0, 1) + 0.1*Math.sin(this.progress*40);
+    var triggerTime = 77.1;
+    var endTime = triggerTime + 0.5;
+    if (time > triggerTime) {
+        //girl.setPos(new THREE.Vector3(0, 0, 0));
 
-    ///
-    warp = this.warpSeriesSet.seriesList[0];
-    warp.setPos(new THREE.Vector3(x, y, 0));
+        //girl.settings.sinAmp = 0.5;
+        //girl.settings.sinFrq = 75;
 
+        girl.settings.sinAmp = smoothMap(triggerTime, endTime,
+                                        0.3, 0.01, time);
 
-    var color = new THREE.Color(0xAAAAFF);
-    var gray = new THREE.Color(0xAAAAAA);
-
-    color.lerp(gray, Math.sin(this.progress*40)+1);
-    color.lerp(black, this.progress);
-    warp.setColor(color);
-
-    warp.setRot(10 + lerp(this.progress,0,20) + (Math.sin(this.progress*40)+1)*3 );
-
-    this.warpSeriesSet.setNeon(0);
+        girl.setSize(smoothMap(triggerTime, endTime,
+                                        1.5, 1, time));
+    }
+    
 }
 
 proto._initWarp = function() {
