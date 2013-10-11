@@ -394,7 +394,6 @@ function computeBaseAngle(pts, refIdx) {
     var t = new THREE.Vector3();
     t.subVectors(pts[refIdx], pts[0]);
     t.normalize();
-    log(pts[refIdx]);
     return Math.atan2(t.y, t.x);
 }
 
