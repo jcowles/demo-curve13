@@ -1,15 +1,15 @@
 // The Shots class is declared in shot.js
 
-F.Shots.Warp_2 = function(duration, filenameA, filenameB) {
-    F.Shot.call(this, "Warp_2", duration);
+F.Shots.Warp_3 = function(duration, filenameA, filenameB) {
+    F.Shot.call(this, "Warp_3", duration);
 
     this.settings = new (function() {
-        this.sinAmp = 0.02;
-        this.sinFrq = 24;
-        this.sinPhv = 26;
-        this.spawnRate = 10;
-        this.cornerAmp = 1;
-        this.cornerNum = 5;
+        this.sinAmp = 0.01;
+        this.sinFrq = 12;
+        this.sinPhv = 160;
+        this.spawnRate = 0;
+        this.cornerAmp = 8.2;
+        this.cornerNum = 9;
     })();
 
 };
@@ -22,12 +22,12 @@ proto.getGui = function() {
     //
     
     var gui = new dat.GUI();
-    gui.add(this.settings, 'sinAmp', 0, 1);
-    gui.add(this.settings, 'sinFrq', 0, 160);
-    gui.add(this.settings, 'sinPhv', 0, 160);
-    gui.add(this.settings,"spawnRate",  0, 100);
-    gui.add(this.settings,"cornerAmp", 0,9);
-    gui.add(this.settings,"cornerNum", 0,20);
+    gui.add(this.settings, 'sinAmp', 0, 1.1);
+    gui.add(this.settings, 'sinFrq', 0, 160.1);
+    gui.add(this.settings, 'sinPhv', 0, 160.1);
+    gui.add(this.settings,"spawnRate",  0, 100.1);
+    gui.add(this.settings,"cornerAmp", 7,9.1);
+    gui.add(this.settings,"cornerNum", 8,12.1);
     return gui;
 }
 
@@ -44,7 +44,7 @@ proto.onPreload = function() {
 
     
     this.warpSeries = new F.WarpSeries(this.camera, [
-        CURVE_FLAME,
+        CURVE_HEART,
         ]);
 
     this.warpSeries.settings = this.settings;
@@ -60,7 +60,7 @@ proto.onDraw = function(time, dt) {
 
     renderer.setClearColor(0, 1);
 
-    this.warpSeries.setColor(new THREE.Color(0xff44AA));
+    this.warpSeries.setColor(new THREE.Color(0x0000FF));
 
     // XXX Do a more complicated mapping here
     this.warpSeries.setTime(this.progress);
@@ -69,7 +69,7 @@ proto.onDraw = function(time, dt) {
 proto._initWarp = function() {
 }
 
-F.Shots.Warp_2.prototype = proto;
+F.Shots.Warp_3.prototype = proto;
 delete proto;
 
 

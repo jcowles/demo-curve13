@@ -1,15 +1,15 @@
 F.WarpSeries = function(camera, curvesList) {
 
     this.camera = camera;
-    this.curvesList = curvesList;
+    this.numCurves = curvesList.length;
     this.curvaturesList = [];
     this.restAngles = [];
     this.restCurvatureSums = []
     this.restEdgeLens = []
 
-    for (var i=0; i<this.curvesList.length; i++) {
-        c = this.curvesList[i];
-        var curvatures = computeCurvatures(c);
+    for (var i=0; i<this.numCurves; i++) {
+        c = curvesList[i];
+        curvatures = computeCurvatures(c);
         this.curvaturesList.push(curvatures);
         this.restAngles.push(computeBaseAngle(c));
         this.restCurvatureSums.push(computeCurvatureSum(curvatures));
@@ -17,9 +17,9 @@ F.WarpSeries = function(camera, curvesList) {
     }
 
     // Init the "current" arrays with the first curve.
-    this.curvatures = computeCurvatures(this.curvesList[0]);
-    this.tangents = computeTangents(this.curvesList[0]);
-    this.pts = this.curvesList[0].slice(0);
+    this.curvatures = computeCurvatures(curvesList[0]);
+    this.tangents = computeTangents(curvesList[0]);
+    this.pts = curvesList[0].slice(0);
 
     //////////////////////
 
@@ -106,9 +106,9 @@ proto.setTime = function(time) {
 
     // Find the 2 curvature sets that represent the nearby shapes.
     var clampedTime = Math.min(Math.max(0,time), 1);
-    var floatIdx = clampedTime * (this.curvesList.length-1);
+    var floatIdx = clampedTime * (this.numCurves-1);
     var curveAIdx = Math.floor(floatIdx);
-    var curveBIdx = Math.min(curveAIdx+1, this.curvesList.length-1);
+    var curveBIdx = Math.min(curveAIdx+1, this.numCurves-1);
     var fracIdx = floatIdx - curveAIdx;
     fracIdx = smoothStep(fracIdx);
 
@@ -120,14 +120,21 @@ proto.setTime = function(time) {
                                   + fracIdx*this.curvaturesList[curveBIdx][cIdx];
     }
 
-    // Add some stressful perturbations
+    // Add some sinusoidal perturbations
     for (var cIdx=0; cIdx<this.curvatures.length; cIdx++) {
         this.curvatures[cIdx] += 
             this.settings.sinAmp * Math.sin( 
             this.settings.sinPhv*time + cIdx/(this.curvatures.length-1.0) 
             *this.settings.sinFrq*2*Math.PI);
     }
-
+    // Add some starlike dirac delta perurbations
+    var cornerNum = Math.floor(this.settings.cornerNum);
+    for (var i=0; i<cornerNum; i++) {
+        var step = this.curvatures.length/cornerNum;
+        this.curvatures[i*step] = this.settings.cornerAmp;
+        this.curvatures[Math.floor((i+0.5)*step)] = -this.settings.cornerAmp;
+    }
+    
     // Enforce that the sum of the perturbed curvature is the same as the
     // rest curvature sum.  This prevents perturbation-induced discontinuity at
     // the endpoint.
@@ -255,6 +262,14 @@ function computeTangents(pts) {
 }
 
 function computeCurvatures(pts) {
+    if (isFunction(pts)) {
+        var cs = [];
+        for (var i=0; i<1000; i++) {
+            cs[i] = pts(i, 1000);
+        }
+        return cs;
+    }
+
     // compute numPts-1 curvatures, one per point
     // excluding the final point, whose curvature
     // is identical to the first point's, because
@@ -323,7 +338,7 @@ function computeBaseAngle2(pts) {
 
 function computeBaseAngle(pts) {
     var t = new THREE.Vector3();
-    t.subVectors(pts[100], pts[0]);
+    t.subVectors(pts[500], pts[0]);
     t.normalize();
     return Math.atan2(t.y, t.x);
 }
@@ -342,6 +357,7 @@ function computeEdgeLen(pts) {
     return e.length();
 }
 
-function smoothStep(t) {
-    return 6*t*t*t*t*t - 15*t*t*t*t + 10*t*t*t;
+// Thanks stackOverflow
+function isFunction(x) {
+    return Object.prototype.toString.call(x) == '[object Function]';
 }
