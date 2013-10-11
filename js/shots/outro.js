@@ -26,7 +26,7 @@ proto.onBegin = function() {
 }
 
 proto.onDraw = function(time, dt) {
-    if (time < 1.33) {
+    if (this.progress > 0.98) {
         this.meshes.forEach(function(m) { m.visible = false; });
         return;
         //this.mesh.visible = true;
@@ -54,7 +54,7 @@ proto.onDraw = function(time, dt) {
                           [(prog-.1) * 200],
                           f(a) -.2, 
                           f(a));
-        m.material.wireframe = !m.material.wireframe;
+        m.material.wireframe = Math.random() > 0.5 + me.progress*.5;
     });
     /*
     this.mesh.geometry.update(new THREE.Vector3(0,0,1), 
@@ -84,7 +84,7 @@ proto.onPreload = function() {
 
     for (var i = 0; i < this.N; i++) {
         //var offset = i//(i/this.N) * (this.N / 2) - this.N/2;
-        var material = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
+        var material = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: false } );
         var geometry = new F.PlanerRibbonGeometry(new THREE.Vector3(0,0,1), 
                                  this.points, 
                                  [200]);
