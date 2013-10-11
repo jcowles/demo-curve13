@@ -37,6 +37,7 @@ function init() {
         [new F.Shots.Warp_3(), 35.0],
         [new F.Shots.Chase_1(), 46.2],
         [new F.Shots.Warp_2(), 52.5],
+
         [new F.Shots.Chase_1(), 59.0],
         [new F.Shots.Warp_2(), 65.27],
 
@@ -59,7 +60,7 @@ function init() {
 
     // EDIT ME FOR CHOREOGRAPHY PURPOSES.
     // The number of seconds into the playlist we actually start playback.
-    seq.setOffset(22);
+    seq.setOffset(0);
 }
 
 function animate() {

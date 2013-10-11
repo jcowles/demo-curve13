@@ -41,15 +41,23 @@ proto.onPreload = function() {
     //this.camera.rotation.y = 0.7;
 
     //////////////////////
-
     
-    this.warpSeries = new F.WarpSeries(this.camera, [
-        CURVE_ARROW,
+    this.warpSeriesSet = new F.WarpSeriesSet(this.camera, [
+        new F.WarpSeries([CURVE_ARROW]),
+        new F.WarpSeries([CURVE_ARROW]),
+        new F.WarpSeries([CURVE_ARROW]),
+        new F.WarpSeries([CURVE_ARROW]),
         ]);
 
-    this.warpSeries.settings = this.settings;
+    for (var i = 0; i < this.warpSeriesSet.seriesList.length; i++) {
+        this.warpSeriesSet.seriesList[i].settings = this.settings;
+    };
 
-    this.composer = this.warpSeries.composer;
+    
+    this.warpSeriesSet.seriesList[0].setColor(new THREE.Color(0xFF00FF));
+    this.warpSeriesSet.seriesList[1].setColor(new THREE.Color(0x00FFFF));
+
+    this.composer = this.warpSeriesSet.composer;
 
     //////////////////////
 
@@ -60,10 +68,34 @@ proto.onDraw = function(time, dt) {
 
     renderer.setClearColor(0, 1);
 
-    this.warpSeries.setColor(new THREE.Color(0x0000FF));
-
     // XXX Do a more complicated mapping here
-    this.warpSeries.setTime(this.progress);
+    this.warpSeriesSet.setTime(this.progress);
+
+    this.warpSeriesSet.seriesList[0].setRot(-90);
+    this.warpSeriesSet.seriesList[0].setPos(
+        vlerp(this.progress,
+            new THREE.Vector3(-2,1,0),
+            new THREE.Vector3(20,1,0) ) );
+
+    this.warpSeriesSet.seriesList[1].setRot(90);
+    this.warpSeriesSet.seriesList[1].setPos(
+        vlerp(this.progress,
+            new THREE.Vector3(2,-1,0),
+            new THREE.Vector3(-20,-1,0) ) );
+
+    this.warpSeriesSet.seriesList[2].setRot(180);
+    this.warpSeriesSet.seriesList[2].setPos(
+        vlerp(this.progress,
+            new THREE.Vector3(1,2,0),
+            new THREE.Vector3(1,-20,0) ) );
+
+    this.warpSeriesSet.seriesList[3].setRot(0);
+    this.warpSeriesSet.seriesList[3].setPos(
+        vlerp(this.progress,
+            new THREE.Vector3(-1,-2,0),
+            new THREE.Vector3(-1,20,0) ) );
+
+    this.warpSeriesSet.setNeon(0);
 }
 
 proto._initWarp = function() {

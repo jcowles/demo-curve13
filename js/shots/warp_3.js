@@ -43,13 +43,16 @@ proto.onPreload = function() {
     //////////////////////
 
     
-    this.warpSeries = new F.WarpSeries(this.camera, [
-        CURVE_HEART,
+    this.warpSeriesSet = new F.WarpSeriesSet(this.camera, [
+        new F.WarpSeries([CURVE_HEART]),
+        new F.WarpSeries([CURVE_ARROW]),
         ]);
 
-    this.warpSeries.settings = this.settings;
+    for (var i = 0; i < this.warpSeriesSet.seriesList.length; i++) {
+        this.warpSeriesSet.seriesList[i].settings = this.settings;
+    };
 
-    this.composer = this.warpSeries.composer;
+    this.composer = this.warpSeriesSet.composer;
 
     //////////////////////
 
@@ -60,10 +63,10 @@ proto.onDraw = function(time, dt) {
 
     renderer.setClearColor(0, 1);
 
-    this.warpSeries.setColor(new THREE.Color(0x0000FF));
+    this.warpSeriesSet.seriesList[0].setColor(new THREE.Color(0x0000FF));
 
     // XXX Do a more complicated mapping here
-    this.warpSeries.setTime(this.progress);
+    this.warpSeriesSet.setTime(this.progress);
 }
 
 proto._initWarp = function() {
