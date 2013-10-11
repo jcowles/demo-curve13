@@ -79,6 +79,28 @@ proto.onPreload = function() {
     this.scene = new THREE.Scene();
 
     //
+    // Textured quads for credits
+    //
+    var text = new THREE.ImageUtils.loadTexture("tex/title.png");
+    var texj = new THREE.ImageUtils.loadTexture("tex/jcowles.png");
+    var texa = new THREE.ImageUtils.loadTexture("tex/andru.png");
+    var matt = new THREE.MeshBasicMaterial({map:text, transparent:true});
+    var matj = new THREE.MeshBasicMaterial({map:texj, transparent:true});
+    var mata = new THREE.MeshBasicMaterial({map:texa, transparent:true});
+    var textsize = 2000;
+    var gt = new THREE.PlaneGeometry(textsize,textsize);
+    var gj = new THREE.PlaneGeometry(textsize,textsize);
+    var ga = new THREE.PlaneGeometry(textsize,textsize);
+    var mt = new THREE.Mesh(gt, matt);
+    var mj = new THREE.Mesh(gj, matj);
+    var ma = new THREE.Mesh(ga, mata);
+
+    this.scene.add(mt);
+    this.scene.add(mj);
+    this.scene.add(ma);
+
+
+    //
     // Add some geometry
     //
 
@@ -105,6 +127,8 @@ proto.onPreload = function() {
     this.scene.add(this.mesh);
     this.mesh.visible = false;
     */
+
+
 }
 
 F.Shots.Outro.prototype = proto;
