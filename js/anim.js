@@ -59,7 +59,6 @@ OnBeat = function(times, onFunc, offFunc) {
         for (var i = 0; i < this.times.length; i++) {
             if (time >= this.times[i]) {
                 times.splice(i, 1);
-                log(times);
                 this.onFunc(time);
                 didHit = true;
             }
