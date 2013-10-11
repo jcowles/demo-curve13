@@ -61,7 +61,7 @@ function init() {
         [new F.Shots.Warp_6(), 76.6],
 
         // Whistle break
-        [new F.Shots.Outro(), 78.2],
+        [new F.Shots.WhistleBreak(), 78.2],
             //[new F.Shots.CircleSpline_2(), 86.5],
             [new F.Shots.CircleSpline_4(), 88.0],
             [new F.Shots.CircleSpline_1(), 89.5],
