@@ -42,23 +42,23 @@ function init() {
 
         [new F.Shots.CircleSpline_2(), 46.2],
 
-        // M Sizzle strings 1
+        // M Sizzle strings 1, grand neon reveal
         [new F.Shots.Warp_2(), 52.5],
 
         [new F.Shots.CircleSpline_1(), 59.0],
 
-        // M Sizzle strings 2
-        [new F.Shots.Warp_2(), 65.27],
+        // M Sizzle strings 2, grand costar reveal
+        [new F.Shots.Warp_4(), 65.27],
 
         [new F.Shots.CircleSpline_5(), 71.8],
 
         // S Beat 1
-        [new F.Shots.Warp_2(), 73.4],
+        [new F.Shots.Warp_5(), 73.4],
 
         [new F.Shots.CircleSpline_1(), 75.0],
 
         // S Beat 2
-        [new F.Shots.Warp_2(), 76.6],
+        [new F.Shots.Warp_6(), 76.6],
 
         // Whistle break
         [new F.Shots.CircleSpline_3(), 78.2],
@@ -68,17 +68,17 @@ function init() {
             [new F.Shots.CircleSpline_3(), 91.0],
 
         // M Beats 1
-        [new F.Shots.Warp_2(), 93.7],
+        [new F.Shots.Warp_7(), 93.7],
 
         [new F.Shots.CircleSpline_1(), 97.0],
 
         // M Beats 2
-        [new F.Shots.Warp_2(), 100.1],
+        [new F.Shots.Warp_8(), 100.1],
 
         [new F.Shots.CircleSpline_1(), 103.2],
 
         // L Neon beats and crescendo with hard out to outro
-        [new F.Shots.Warp_2(), 106.4],
+        [new F.Shots.Warp_9(), 106.4],
         
         [new F.Shots.CircleSpline_1(), 113.1],
 
