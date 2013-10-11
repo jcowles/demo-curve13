@@ -51,7 +51,8 @@ proto.onPreload = function() {
         this.warpSeriesSet.seriesList[i].settings = this.settings;
     };
 
-    this.warpSeriesSet.seriesList[0].setColor(new THREE.Color(0xAAAAFF));
+    this.warpSeriesSet.seriesList[0].setColor(new THREE.Color(0));
+    this.warpSeriesSet.setNeon(0);
 
     this.composer = this.warpSeriesSet.composer;
 
@@ -88,6 +89,7 @@ proto.onDraw = function(time, dt) {
         warp.settings.spawnRate = 10;
     } else {
         color.lerp(black, this.progress * (Math.sin(this.progress*40)+1) );
+        color.lerp(black, 1- (time - this.startTime) / this.duration);
         renderer.setClearColor(black, 1);
         this.warpSeriesSet.setNeon(0);
     }
