@@ -32,12 +32,12 @@ function init() {
 
         [new F.Shots.CircleSpline_3(), 9.23],
 
-        // Cold neon intro
+        // Cold neon intro, vocals
         [new F.Shots.Warp_1(), 22.2],
         
         [new F.Shots.CircleSpline_4(), 28.5],
 
-        // L has dwell and hard out
+        // L has vocals, dwell and hard out after brief crescendo
         [new F.Shots.Warp_3(), 35.0],
 
         [new F.Shots.CircleSpline_2(), 46.2],
