@@ -27,14 +27,18 @@ proto.onBegin = function() {
 
 proto.onDraw = function(time, dt) {
     // CREDITS NAMES
-    var jShift = smoothMap(0.1, 0.2, 0, -3000, this.progress) +
-                 smoothMap(0.3, 0.4, 0, -3000, this.progress);
+    var p = Math.min(1, this.progress);
+    var jShift = smoothMap(0.1, 0.2, 0, -3000, p) +
+                 smoothMap(0.3, 0.4, 0, -3000, p);
 
-    var aShift = smoothMap(0.1, 0.2, 0, 3000, this.progress) +
-                 smoothMap(0.3, 0.4, 0, 3000, this.progress);
+    var aShift = smoothMap(0.1, 0.2, 0, 3000, p) +
+                 smoothMap(0.3, 0.4, 0, 3000, p);
    
+    if (time < 120) {
+    jShift = -3000;
+    aShift = 3000;
+    }
     this.mj.position.set(2500 + jShift,200,0);
-
     this.ma.position.set(-2500 + aShift,-200,0);
 
     this.mt.scale.y = smoothMap(0.62,0.77, 0.0001, 1, this.progress);
@@ -90,7 +94,7 @@ proto.onPreload = function() {
                                 1, 10000 );
     this.camera.position.z = 1000;
     this.scene = new THREE.Scene();
-
+    this.sceneMasked = new THREE.Scene();
 
     //
     // Textured quads for credits
@@ -111,8 +115,11 @@ proto.onPreload = function() {
 
     //this.scene.add(mt);
     this.scene.add(this.mt);
-    this.scene.add(this.mj);
-    this.scene.add(this.ma);
+    this.sceneMasked.add(this.mj);
+    this.sceneMasked.add(this.ma);
+
+    this.composer = Circ.GetMaskComposer(renderer, this.scene, this.camera,
+                                    this.sceneMasked, this.camera);
 
     //
     // Add some geometry

@@ -1,6 +1,42 @@
 Circ = {};
+
+// Renders the scene & camera and makes a mask
+// then renders the masked scene into that mask, only revealing areas
+// that overlap with the scene/camera
+Circ.GetMaskComposer = function(renderer, scene, camera, maskedScene, maskedCamera) {
+    var rwidth = window.innerWidth || 1;
+    var rheight = window.innerHeight || 1;
+    var parameters = { minFilter: THREE.LinearFilter, 
+                       magFilter: THREE.LinearFilter, 
+                       format: THREE.RGBFormat, 
+                       stencilBuffer: true };
+
+    var renderTarget = new THREE.WebGLRenderTarget(rwidth, rheight, parameters);
+    var composer = new THREE.EffectComposer(renderer, renderTarget)
+    
+    composer.model = new THREE.RenderPass(scene, camera);
+    composer.addPass(composer.model);
+
+    var mask = new THREE.MaskPass(scene, camera);
+    //mask.inverse = true;
+    composer.addPass(mask);
+
+    composer.modelM = new THREE.RenderPass(maskedScene, maskedCamera);
+    composer.modelM.clear = false;
+    composer.addPass(composer.modelM);
+
+    composer.clearMask = new THREE.ClearMaskPass();
+    composer.addPass(composer.clearMask);
+   
+    var effectCopy = new THREE.ShaderPass(THREE.CopyShader);
+    effectCopy.renderToScreen = true;
+    composer.addPass(effectCopy);
+
+    return composer;
+};
+
 Circ.GetComposer = function(renderer, scene, camera) {
-    composer = new THREE.EffectComposer( renderer );
+    var composer = new THREE.EffectComposer( renderer );
     
     composer.model = new THREE.RenderPass(scene, camera);
     composer.addPass(composer.model); // render to buffer1
