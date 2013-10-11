@@ -21,7 +21,7 @@ Circ.GetMaskComposer = function(renderer, scene, camera, maskedScene, maskedCame
     //mask.inverse = true;
     composer.addPass(mask);
 
-    composer.modelM = new THREE.RenderPass(maskScene, maskCamera);
+    composer.modelM = new THREE.RenderPass(maskedScene, maskedCamera);
     composer.modelM.clear = false;
     composer.addPass(composer.modelM);
 

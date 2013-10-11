@@ -90,7 +90,7 @@ proto.onPreload = function() {
                                 1, 10000 );
     this.camera.position.z = 1000;
     this.scene = new THREE.Scene();
-
+    this.sceneMasked = new THREE.Scene();
 
     //
     // Textured quads for credits
@@ -111,8 +111,11 @@ proto.onPreload = function() {
 
     //this.scene.add(mt);
     this.scene.add(this.mt);
-    this.scene.add(this.mj);
-    this.scene.add(this.ma);
+    this.sceneMasked.add(this.mj);
+    this.sceneMasked.add(this.ma);
+
+    this.composer = Circ.GetMaskComposer(renderer, this.scene, this.camera,
+                                    this.sceneMasked, this.camera);
 
     //
     // Add some geometry
