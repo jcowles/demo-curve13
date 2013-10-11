@@ -10,6 +10,8 @@ F.Shots.CircleSpline_4 = function(duration) {
     this.points = [];
     this.origin  = new THREE.Vector2(100, -400);
     this.size = 200;
+    this.rgbAmt = 0;
+    this.reverse = false;
 
     this.settings = new (function() {
         this.rotateX = 0;
@@ -24,18 +26,21 @@ F.Shots.CircleSpline_4 = function(duration) {
 
     var me = this;
     this.seperator = new OnBeat(
-                [9.5, 10.32, 11.13, 11.9, 12.6, 13.4, 14.29],
+                [28, 
+                 29.3, 29.6, 
+                 31.0, 31.2, 31.5, 31.7, 
+                 33.3],
+                function(time) { me.rgbAmt = .09; },
                 function(time) {
-                    me.rgb.uniforms[ 'amount' ].value = .09*Math.sin(100*Math.sin(time*10)*Math.sin(time*2));
-                },
-                function(time) {
-                    me.rgb.uniforms[ 'amount' ].value = .0;
+                    me.rgbAmt = Math.max(0, me.rgbAmt*.8) + .001*Math.sin(time*40);
                 });
 };
 
 proto = Object.create(F.Shot.prototype);
 
 proto.onDraw = function(time, dt) {
+    if (time > 34 && time < 39) 
+        this.reverse = true;
 
     this.rgb.uniforms[ 'amount' ].value = 1.0;
     if (this.vignette) {
@@ -44,6 +49,7 @@ proto.onDraw = function(time, dt) {
     }
     if (this.rgb) {
         this.seperator.hit(time);
+        this.rgb.uniforms[ 'amount' ].value = this.rgbAmt;
         if (time > 87 && time < 97) {
             this.rgb.uniforms[ 'amount' ].value = .09*Math.sin(100*Math.sin(time*10)*Math.sin(time*2));
         }

@@ -49,6 +49,8 @@ proto.onDraw = function(time, dt) {
     time = this.progress*190*10;
     var normal = new THREE.Vector3(0,0,1);
 
+        log(me.progress + " - " + me.progress * .5)
+
     this.ribbons.forEach(function(ribbonMesh, index) {
         var p_cutoff = (Math.cos(me.progress*10)*.5 + .5) * (70*5);
         var n_cutoff = -1 * ((Math.sin(me.progress*10)*.5 + .5) * (70*5));
@@ -67,15 +69,11 @@ proto.onDraw = function(time, dt) {
         //me.tracer.reset(me.origin, me.size, ribbonMesh.ribbonOffset)
         //me.tracer.iterations = 20;
 
-        t = (time - ribbonMesh.ribbonOffset) + Math.sin(me.progress * 2*Math.PI) * 100;
-        if (t < 0) t = 0.001;
-        //me.arcDriver(me.tracer, t);
-        
         ribbonMesh.geometry.update(normal, 
                                  me.points[index], //me.tracer.points, 
                                  [2.8],
                                  me.progress*.5,
-                                 me.progress);
+                                 me.progress+.00000001);
         ribbonMesh.frustumCulled = false;
 
     });

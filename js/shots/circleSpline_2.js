@@ -4,6 +4,8 @@ F.Shots.CircleSpline_2 = function(duration) {
     F.Shot.call(this, "CircleSpline_2", duration);
     this.lineGroup = null;
     this.geom = null;
+    this.meshes = [];
+    this.lines = [];
 
     this.settings = new (function() {
         this.rotateX = 0;
@@ -18,8 +20,22 @@ proto.onDraw = function(time, dt) {
     renderer.setClearColor(CircleSplineBg, 1);
     this.camera.position.x += Math.sin(time);
     this.camera.position.z += 10*Math.cos(time);
+
     this.lineGroup.rotation.x += this.settings.rotateX;
     this.lineGroup.rotation.y += .05*Math.cos(Math.sin(time)); //this.settings.rotateY;
+    /*
+    */
+
+    for (var i = 0; i < this.meshes.length; i++) {
+        this.meshes[i].position.z = this.meshes[i].offset*.07 * this.progress;
+        this.meshes[i].rotation.y = this.meshes[i].offset*.07 * this.progress;
+    }
+
+    for (var i = 0; i < this.lines.length; i++) {
+        var p = Math.max(0, this.progress - .5);
+        this.lines[i].position.z = this.meshes[i].offset*.07 * p;
+        this.lines[i].rotation.y = this.meshes[i].offset*.07 * p;
+    }
 }
 
 proto.getGui = function() {
@@ -31,6 +47,43 @@ proto.getGui = function() {
     gui.add(this.settings, 'rotateX', -5, 5);
     gui.add(this.settings, 'rotateY', -5, 5);
     return gui;
+}
+
+proto.foo = function(tracer, a, b, max, state) {
+    if (state.angle < max) {
+        tracer.arc(a,b,state.angle,state.lock);
+        state.lock = true;
+    } else {
+        tracer.arc(a,b,max,state.lock);
+        state.angle -= max;
+    }
+    return state;
+}
+
+proto.arcDriver = function (tracer, angle) {
+    var state = { lock: false,
+              angle: angle };
+
+    this.foo(tracer,0,0,90,state);
+    this.foo(tracer,0,0,90,state);
+    this.foo(tracer,0,0,90,state);
+    this.foo(tracer,0,0,90,state);
+    this.foo(tracer,1,0,90,state);
+    this.foo(tracer,0,0,90,state);
+    this.foo(tracer,0,0,90,state);
+    this.foo(tracer,0,0,90,state);
+
+    /*
+    tracer.arc(0,1,90); // can only flip +y
+    tracer.arc(-1,0,90); // can only flip -x
+    tracer.arc(0,0,90); // can only flip y
+    tracer.arc(0,0,90); // can only flip x
+
+    tracer.arc(0,0,90); // can only flip x
+    tracer.arc(1,0,90); // can only flip x
+    tracer.arc(0,0,90); // can only flip x
+    tracer.arc(0,0,90); // can only flip x
+    */
 }
 
 proto.onPreload = function() {
@@ -58,7 +111,7 @@ proto.onPreload = function() {
     //points = hilbert3D( new THREE.Vector3( 0,0,0 ), 200.0, 2, 0, 1, 2, 3, 4, 5, 6, 7 ),
 
     var points = [];
-    var origin  = new THREE.Vector2(100, -400);
+    var origin  = new THREE.Vector2(0, 0);
     var material = new THREE.LineBasicMaterial( { color: csLineB, opacity: 1, linewidth: 3, vertexColors: THREE.VertexColors } );
 
     var count = 40;
@@ -73,16 +126,13 @@ proto.onPreload = function() {
         this.geom = geometry;
         //origin.x += 5;
         //origin.y += 5;
-        tracer = new F.ArcTracer(origin, size, offset);
+        tracer = new this.ArcTracer(origin, size, offset);
         offset += offsetStep;
         if (offset == 0)
             tcent = tracer;
-        tracer.arc(0,0,90); // can flip either
-        tracer.arc(0,1,90); // can only flip +y
-        tracer.arc(-1,0,90); // can only flip -x
-        tracer.arc(0,0,90); // can only flip y
-        tracer.arc(0,0,90); // can only flip x
-        tracer.arc(0,-1,90); // can only flip x
+        this.arcDriver(tracer, 9000);
+
+        //tracer.arc(0,-1,90); // can only flip x
         /*
         */
 
@@ -113,6 +163,7 @@ proto.onPreload = function() {
             line.position.y = p[ 2 ][ 1 ];
             line.position.z = p[ 2 ][ 2 ];
             this.lineGroup.add(line);
+            this.lines.push(line);
         }
 
         /*
@@ -121,12 +172,16 @@ proto.onPreload = function() {
                                  tracer.points, 
                                  [2]);
 
-        var m = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true } );
+        var m = new THREE.MeshBasicMaterial( { 
+                color: 0xff0000, 
+                wireframe: true } );
         var mesh = new THREE.Mesh(geometry, m);
         mesh.scale.x = mesh.scale.y = mesh.scale.z = .3*5.5;
         mesh.position.x = d;
         mesh.position.y = d;
         mesh.position.z = 0;
+        mesh.offset = offset;
+        this.meshes.push(mesh);
         this.lineGroup.add( mesh );
     }
 
@@ -148,26 +203,45 @@ proto.onPreload = function() {
     this.scene.add(this.lineGroup);
 }
 
-F.Shots.CircleSpline_2.prototype = proto;
-delete proto;
-
-
 // helper functions
 var DegToRad = (Math.PI/180);
 
-F.ArcTracer = function (origin, size, offset) {
-    this.origin = origin; 
-    this.size = size;
-    this.offset = offset;
-    this.xLoc = 0;
-    this.yLoc = 0;
-    this.xAngle = 0;
-    this.yAngle = 0;
-    this.points = [];
-    this.t = 0;
+proto.ArcTracer = function (origin, size, offset) {
 
-    this.arc = function (xAdj, yAdj, sweepDeg) {
-        var iterations = 20.0;
+    var DegToRad = (Math.PI/180);
+
+    this.reset = function(origin, size, offset) {
+        this.origin = origin; 
+        this.size = size;
+        this.offset = offset;
+        this.xLoc = 0;
+        this.yLoc = 0;
+        this.xAngle = 0;
+        this.yAngle = 0;
+        this.points = [];
+        this.t = 0;
+        this.iterations = 3;
+    };
+
+
+    this.reset(origin, size, offset);
+
+    this.arc = function (xAdj, yAdj, sweepDeg, lock) {
+        lock = lock || false;
+        var start = this.points.length == 0 ? 0 : 1;
+
+        if (lock) {
+            if (this.points.length == 0) {
+                console.error("Unable to lock with zero points!");
+            }
+            // lock all generated verts to the last generated vertex
+            var point = this.points[this.points.length-1];
+            for (var i = start; i < this.iterations; i++) {
+                this.points.push(point);
+            }
+            return;
+        }
+
         var sweepRad = sweepDeg * DegToRad; 
         
         if (xAdj != 0) {
@@ -184,14 +258,15 @@ F.ArcTracer = function (origin, size, offset) {
         var size = this.size + this.offset;
 
         // subtract one to close the circle at angle = 360
-        var dtheta = sweepRad / (iterations-1);
-        var start = this.points.length == 0 ? 0 : 1;
-        for (var i = start; i < iterations; i++) {
+        var dtheta = sweepRad / (this.iterations-1);
+
+        for (var i = start; i < this.iterations; i++) {
             this.t += 1;
-            this.points.push(new THREE.Vector3(
+            var nextPoint = new THREE.Vector3(
                                 this.origin.x + (this.xLoc*2*this.size) + size*Math.cos(this.xAngle+(i*dtheta)), 
                                 this.origin.y + (this.yLoc*2*this.size) + size*Math.sin(this.yAngle+(i*dtheta)), 
-                                10-(this.t/100)));
+                                10*Math.sin(2*Math.PI*this.t/229));
+            this.points.push(nextPoint);
         }
 
         this.xAngle += sweepRad;
@@ -199,32 +274,5 @@ F.ArcTracer = function (origin, size, offset) {
     }
 };
 
-function hilbert3D( center, side, iterations, v0, v1, v2, v3, v4, v5, v6, v7 ) {
-    var half = side / 2,
-            vec_s = [
-            new THREE.Vector3( center.x - half, center.y + half, center.z - half ),
-            new THREE.Vector3( center.x - half, center.y + half, center.z + half ),
-            new THREE.Vector3( center.x - half, center.y - half, center.z + half ),
-            new THREE.Vector3( center.x - half, center.y - half, center.z - half ),
-            new THREE.Vector3( center.x + half, center.y - half, center.z - half ),
-            new THREE.Vector3( center.x + half, center.y - half, center.z + half ),
-            new THREE.Vector3( center.x + half, center.y + half, center.z + half ),
-            new THREE.Vector3( center.x + half, center.y + half, center.z - half )
-            ],
-            vec = [ vec_s[ v0 ], vec_s[ v1 ], vec_s[ v2 ], vec_s[ v3 ], vec_s[ v4 ], vec_s[ v5 ], vec_s[ v6 ], vec_s[ v7 ] ];
-
-    if( --iterations >= 0 ) {
-        var tmp = [];
-        Array.prototype.push.apply( tmp, hilbert3D ( vec[ 0 ], half, iterations, v0, v3, v4, v7, v6, v5, v2, v1 ) );
-        Array.prototype.push.apply( tmp, hilbert3D ( vec[ 1 ], half, iterations, v0, v7, v6, v1, v2, v5, v4, v3 ) );
-        Array.prototype.push.apply( tmp, hilbert3D ( vec[ 2 ], half, iterations, v0, v7, v6, v1, v2, v5, v4, v3 ) );
-        Array.prototype.push.apply( tmp, hilbert3D ( vec[ 3 ], half, iterations, v2, v3, v0, v1, v6, v7, v4, v5 ) );
-        Array.prototype.push.apply( tmp, hilbert3D ( vec[ 4 ], half, iterations, v2, v3, v0, v1, v6, v7, v4, v5 ) );
-        Array.prototype.push.apply( tmp, hilbert3D ( vec[ 5 ], half, iterations, v4, v3, v2, v5, v6, v1, v0, v7 ) );
-        Array.prototype.push.apply( tmp, hilbert3D ( vec[ 6 ], half, iterations, v4, v3, v2, v5, v6, v1, v0, v7 ) );
-        Array.prototype.push.apply( tmp, hilbert3D ( vec[ 7 ], half, iterations, v6, v5, v2, v1, v0, v3, v4, v7 ) );
-        return tmp;
-    }
-    return vec;
-}
-
+F.Shots.CircleSpline_2.prototype = proto;
+delete proto;
