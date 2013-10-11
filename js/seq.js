@@ -54,7 +54,7 @@ F.Seq.prototype = {
         if (this.gui)
             this.gui.destroy();
         delete this.gui;
-        this.gui = curShot.getGui();
+        //this.gui = curShot.getGui();
     },
 
     update: function() {

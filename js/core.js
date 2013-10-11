@@ -10,10 +10,10 @@ function log(msg) {
 }
 
 function init() {
-    stats = new Stats();
-    stats.domElement.style.position	= 'absolute';
-    stats.domElement.style.bottom	= '0px';
-    document.body.appendChild( stats.domElement );
+    //stats = new Stats();
+    //stats.domElement.style.position	= 'absolute';
+    //stats.domElement.style.bottom	= '0px';
+    //document.body.appendChild( stats.domElement );
 
     renderer = new THREE.WebGLRenderer({
             antialias               : true,    // to get smoother output
@@ -95,7 +95,7 @@ function animate() {
     // note: three.js includes requestAnimationFrame shim
     requestAnimationFrame( animate );
 
-    stats.update();
+    //stats.update();
     seq.update();
 }
 
