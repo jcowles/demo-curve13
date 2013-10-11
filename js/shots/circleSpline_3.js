@@ -21,16 +21,8 @@ F.Shots.CircleSpline_3 = function(duration) {
 
 proto = Object.create(F.Shot.prototype);
 
-function arcDriver(tracer, angle) {
-    tracer.arc(0,0,time*10); // can flip either
-    tracer.arc(0,1,90); // can only flip +y
-    tracer.arc(-1,0,90); // can only flip -x
-    tracer.arc(0,0,90); // can only flip y
-    tracer.arc(0,0,90); // can only flip x
-    tracer.arc(0,-1,90); // can only flip x
-}
-
 proto.onDraw = function(time, dt) {
+    renderer.setClearColor(CircleSplineBg, 1);
     this.camera.position.x = this.settings.camX;
     this.camera.position.y = this.settings.camY;
     this.camera.position.z = this.settings.camZ;
@@ -39,7 +31,7 @@ proto.onDraw = function(time, dt) {
 
     var tracer = new F.ArcTracer(this.origin, this.size, 0);
     tracer.iterations = 30;
-    tracer.arc(0,0,this.progress*6000); // can flip either
+    tracer.arc(0,0,this.progress*90000); // can flip either
     /*
     tracer.arc(0,1,90); // can only flip +y
     tracer.arc(-1,0,90); // can only flip -x

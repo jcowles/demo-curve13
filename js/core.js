@@ -30,52 +30,52 @@ function init() {
     seq.addShots([
         [new F.Shots.Intro(), 0],
 
-        [new F.Shots.Chase_1(), 9.23],
+        [new F.Shots.CircleSpline_3(), 9.23],
 
         // Cold neon intro
         [new F.Shots.Warp_1(), 22.2],
         
-        [new F.Shots.Chase_1(), 28.5],
+        [new F.Shots.CircleSpline_4(), 28.5],
 
         // L has dwell and hard out
         [new F.Shots.Warp_3(), 35.0],
 
-        [new F.Shots.Chase_1(), 46.2],
+        [new F.Shots.CircleSpline_2(), 46.2],
 
         // M Sizzle strings 1
         [new F.Shots.Warp_2(), 52.5],
 
-        [new F.Shots.Chase_1(), 59.0],
+        [new F.Shots.CircleSpline_1(), 59.0],
 
         // M Sizzle strings 2
         [new F.Shots.Warp_2(), 65.27],
 
-        [new F.Shots.Chase_1(), 71.8],
+        [new F.Shots.CircleSpline_5(), 71.8],
 
         // S Beat 1
         [new F.Shots.Warp_2(), 73.4],
 
-        [new F.Shots.Chase_1(), 75.0],
+        [new F.Shots.CircleSpline_1(), 75.0],
 
         // S Beat 2
         [new F.Shots.Warp_2(), 76.6],
 
-        [new F.Shots.Chase_1(), 78.2],
+        [new F.Shots.CircleSpline_1(), 78.2],
 
         // M Beats 1
         [new F.Shots.Warp_2(), 93.7],
 
-        [new F.Shots.Chase_1(), 97.0],
+        [new F.Shots.CircleSpline_1(), 97.0],
 
         // M Beats 2
         [new F.Shots.Warp_2(), 100.1],
 
-        [new F.Shots.Chase_1(), 103.2],
+        [new F.Shots.CircleSpline_1(), 103.2],
 
         // L Neon beats and crescendo with hard out to outro
         [new F.Shots.Warp_2(), 106.4],
         
-        [new F.Shots.Chase_1(), 113.1],
+        [new F.Shots.CircleSpline_1(), 113.1],
 
         ]);
 
