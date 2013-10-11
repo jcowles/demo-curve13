@@ -32,9 +32,11 @@ proto.onDraw = function(time, dt) {
 
     var speed = 90000;
     var sizeAdj = 0;
+    //this.composer.film.uniforms['grayscale'].value = false;
     if (time > 14.4 && time < 16.0) {
         speed = 900*Math.cos(time);
         sizeAdj = 0;
+        //this.composer.film.uniforms['grayscale'].value = true;
     } else if (time > 16.0 && time < 17.5) {
         this.ribbon.rotation.z = time;
         speed = 70000;
