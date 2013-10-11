@@ -88,7 +88,7 @@ function init() {
 
     // EDIT ME FOR CHOREOGRAPHY PURPOSES.
     // The number of seconds into the playlist we actually start playback.
-    seq.setOffset(9.23);
+    seq.setOffset(0);
 }
 
 function animate() {
