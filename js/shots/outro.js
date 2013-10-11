@@ -37,7 +37,7 @@ proto.onDraw = function(time, dt) {
 
     this.ma.position.set(-2500 + aShift,-200,0);
 
-    this.mt.scale.y = smoothMap(0.62,0.77, 0, 1, this.progress);
+    this.mt.scale.y = smoothMap(0.62,0.77, 0.0001, 1, this.progress);
 
     if (this.progress > 0.98) {
         this.meshes.forEach(function(m) { m.visible = false; });
