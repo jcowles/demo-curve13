@@ -65,7 +65,7 @@ function init() {
             [new F.Shots.CircleSpline_2(), 86.5],
             [new F.Shots.CircleSpline_4(), 88.0],
             [new F.Shots.CircleSpline_5(), 89.5],
-            [new F.Shots.CircleSpline_3(), 92.2],
+            [new F.Shots.CircleSpline_3(), 91.0],
 
         // M Beats 1
         [new F.Shots.Warp_2(), 93.7],

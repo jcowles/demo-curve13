@@ -44,13 +44,16 @@ proto.onDraw = function(time, dt) {
     }
     if (this.rgb) {
         this.seperator.hit(time);
+        if (time > 87 && time < 97) {
+            this.rgb.uniforms[ 'amount' ].value = .09*Math.sin(100*Math.sin(time*10)*Math.sin(time*2));
+        }
     }
 
 
 
     renderer.setClearColor(CircleSplineBg, 1);
 
-    this.camera.position.x = -500 + this.progress*-1500; //this.settings.camX;
+    this.camera.position.x = -200 + this.progress*-1300; //this.settings.camX;
     this.camera.position.y = this.settings.camY;
     this.camera.position.z = 800;//1000+ 200*Math.sin(time/2);//dt*20;
     //this.camera.position.z = this.settings.camZ;
@@ -190,11 +193,7 @@ proto.onPreload = function() {
     // Setup composer
     //
     this.composer = Circ.GetComposer(renderer, this.scene, this.camera);
-
-    this.rgb = new THREE.ShaderPass( THREE.RGBShiftShader );
-    this.rgb.uniforms[ 'amount' ].value = 0.0;
-    this.rgb.renderToScreen = true;
-    this.composer.addPass( this.rgb );
+    this.rgb = composer.rgb; 
 
     //
     // Add some geometry

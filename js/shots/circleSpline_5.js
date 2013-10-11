@@ -111,6 +111,13 @@ proto.onPreload = function() {
     dirLight.position.set( 0, 0, 1 ).normalize();
     this.scene.add( dirLight );
 
+     // 
+    // Setup composer
+    //
+    this.composer = Circ.GetComposer(renderer, this.scene, this.camera);
+    this.rgb = composer.rgb; 
+
+
     //
     // Add some geometry
     //
