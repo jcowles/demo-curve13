@@ -30,7 +30,7 @@ function init() {
     seq.addShots([
         [new F.Shots.Intro(), 0],
 
-        [new F.Shots.CircleSpline_3(), 9.23],
+        [new F.Shots.CircleSpline_6(), 9.23],
 
         // Cold neon intro, vocals
         [new F.Shots.Warp_1(), 22.2],
@@ -61,10 +61,10 @@ function init() {
         [new F.Shots.Warp_6(), 76.6],
 
         // Whistle break
-        [new F.Shots.CircleSpline_3(), 78.2],
-            [new F.Shots.CircleSpline_2(), 86.5],
+        [new F.Shots.Intro(), 78.2],
+            //[new F.Shots.CircleSpline_2(), 86.5],
             [new F.Shots.CircleSpline_4(), 88.0],
-            [new F.Shots.CircleSpline_5(), 89.5],
+            [new F.Shots.CircleSpline_1(), 89.5],
             [new F.Shots.CircleSpline_3(), 91.0],
 
         // M Beats 1
@@ -80,7 +80,7 @@ function init() {
         // L Neon beats and crescendo with hard out to outro
         [new F.Shots.Warp_9(), 106.4],
         
-        [new F.Shots.CircleSpline_1(), 113.1],
+        [new F.Shots.Outro(), 113.1],
 
         ]);
 
@@ -88,7 +88,7 @@ function init() {
 
     // EDIT ME FOR CHOREOGRAPHY PURPOSES.
     // The number of seconds into the playlist we actually start playback.
-    seq.setOffset(0);
+    seq.setOffset(113.1);
 }
 
 function animate() {

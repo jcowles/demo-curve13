@@ -38,6 +38,15 @@ proto.onDraw = function(time, dt) {
     var me = this;
     renderer.setClearColor(CircleSplineBg, 1);
 
+    if (time > 78 && time < 85) {
+        this.composer.setTiltEnabled(true);
+        //this.composer.setTiltBlur(4, 5);
+        //this.composer.setTiltDepth(0.5);
+    } else {
+        this.composer.setTiltEnabled(false);
+
+    }
+
     this.camera.position.x = this.settings.camX;
     this.camera.position.y = this.settings.camY;
     this.camera.position.z = this.settings.camZ;
@@ -142,6 +151,7 @@ proto.onPreload = function() {
     // Setup composer
     //
     this.composer = Circ.GetComposer(renderer, this.scene, this.camera);
+    this.composer.setTiltEnabled(true);
     this.rgb = composer.rgb; 
 
    //

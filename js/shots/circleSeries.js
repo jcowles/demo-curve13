@@ -9,6 +9,7 @@ Circ.GetComposer = function(renderer, scene, camera) {
     composer.vignette.uniforms[ "offset" ].value = .7;
     composer.vignette.uniforms[ "darkness" ].value = 0.5;
     composer.vignette.renderToScreen = false;
+    composer.vignette.enabled = false;
     composer.addPass(composer.vignette);
 
     composer.tiltH = new THREE.ShaderPass( THREE.HorizontalTiltShiftShader );
@@ -26,8 +27,8 @@ Circ.GetComposer = function(renderer, scene, camera) {
         composer.tiltH.uniforms[ 'h' ].value = (b / window.innerWidth) * f;
     };
     composer.setTiltEnabled = function(en) {
-        composer.tiltV.enabled = en;
-        composer.tiltH.enabled = en;
+        this.tiltV.enabled = en;
+        this.tiltH.enabled = en;
     };
 
     composer.setTiltDepth(0.5);
@@ -37,11 +38,12 @@ Circ.GetComposer = function(renderer, scene, camera) {
 
     composer.rgb = new THREE.ShaderPass( THREE.RGBShiftShader );
     composer.rgb.uniforms[ 'amount' ].value = 0.0;
-    //composer.rgb.renderToScreen = true;
+    composer.rgb.renderToScreen = true;
     composer.addPass(composer.rgb);
 
-    composer.film = new THREE.FilmPass(1, 0.25, 4096, false);
+    composer.film = new THREE.FilmPass(.5, 0.25, 4096, false);
     composer.film.renderToScreen = true;
+    composer.film.enabled = false;
     composer.addPass(composer.film);
 
 

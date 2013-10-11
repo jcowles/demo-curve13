@@ -1,22 +1,67 @@
 // The Shots class is declared in shot.js
 
-F.Shots.CircleSpline_5 = function(duration) {
-    F.Shot.call(this, "CircleSpline_5", duration);
+/*
+CircleSplineBg = 0xFFFFFF;
+csLineA = 0x30D6FF;
+csLineB = 0x333333;
+*/
+CircleSplineBg = 0x111111;
+csLineA = 0x30D6FF;
+csLineB = 0xFFFFFF;
+
+
+F.Shots.CircleSpline_6 = function(duration) {
+    F.Shot.call(this, "CircleSpline_6", duration);
     this.lineGroup = null;
     this.geom = null;
     this.mat = null;
     this.ribbon = null;
     this.ribbons = [];
-    this.origin  = new THREE.Vector2(100, -400);
-    this.size = 200;
+    this.points = [];
+    this.size = 250;
+    this.origin  = new THREE.Vector2(this.size, -this.size);
     this.tracer = new this.ArcTracer();
+    this.bounce = 0;
+    this.N = 2;
+    this.O = 100;
+    this.progOff = 0;
+
+    var me = this;
+    this.onBounce = new OnBeat(
+                [
+                9.28, 
+                9.9, 10.0, 
+                10.76,
+                11.8,
+                12.6,
+                13.4,
+                14.2,
+                //15.1,
+                15.8,
+                16.25, 16.3,
+
+                18.0, 18.3, 18.5, 18.8,
+                20.5, 20.8, 21.0, 21.3,
+                ],
+                function(time) { 
+                    me.bounce = 1; 
+                    me.progOff -= .01;
+                },
+                function(time) {
+                    me.bounce= Math.max(0, me.bounce*.8) + .001*Math.sin(time*4);
+                    if (me.bounce < .8) 
+                        me.composer.setTiltEnabled(true);
+                    if (me.bounce < .2)
+                        me.composer.setTiltEnabled(false);
+                });
+
 
     this.settings = new (function() {
         this.rotateX = -.5;
         this.rotateY = 0.0;
         this.camX = 0;
-        this.camY = -300;
-        this.camZ = 600;
+        this.camY = -200;
+        this.camZ = 550;
         this.hue = .6
     })();
 };
@@ -24,35 +69,67 @@ F.Shots.CircleSpline_5 = function(duration) {
 proto = Object.create(F.Shot.prototype);
 
 proto.onDraw = function(time, dt) {
+    //this.composer.tiltV.enabled = false;
+    //this.composer.tiltH.enabled = false;
     var me = this;
+    this.onBounce.hit(time);
     renderer.setClearColor(CircleSplineBg, 1);
 
+    /*
     this.camera.position.x = this.settings.camX;
     this.camera.position.y = this.settings.camY;
     this.camera.position.z = this.settings.camZ;
+    */
 
-    this.lineGroup.rotation.x = -(this.progress - .1); //this.settings.rotateX;
+    this.lineGroup.rotation.x = -(this.progress + .4); //this.settings.rotateX;
     this.lineGroup.rotation.y = this.settings.rotateY;
-    this.lineGroup.rotation.z = Math.sin(this.progress * Math.PI); //this.progress*4;
+    var p = Math.max(0, this.progress - .2);
+    this.lineGroup.rotation.z += this.bounce*.3 + p*(.07 + .05*Math.sin(this.progress *2* Math.PI)); //this.progress*4;
 
-    time = this.progress*120*10;
+    this.lineGroup.scale.x = this.lineGroup.scale.y = this.lineGroup.scale.z = 1 + this.bounce;
+
+    time = this.progress*190*10;
     var normal = new THREE.Vector3(0,0,1);
+
     this.ribbons.forEach(function(ribbonMesh, index) {
-        me.tracer.reset(me.origin, me.size, ribbonMesh.ribbonOffset)
-        me.tracer.iterations = 20;
-        t = (time - ribbonMesh.ribbonOffset) + Math.sin(me.progress * 2*Math.PI) * 100;
-        if (t < 0) t = 0.001;
-        me.arcDriver(me.tracer, t);
+        /*
+        var p_cutoff = (Math.cos(me.progress*10)*.5 + .5) * (me.N*me.O);
+        var n_cutoff = -1 * ((Math.sin(me.progress*10)*.5 + .5) * (me.N*me.O));
+        if (ribbonMesh.ribbonOffset > 0 &&
+            ribbonMesh.ribbonOffset > p_cutoff) {
+            ribbonMesh.visible = false;
+            return;
+        }
+        if (ribbonMesh.ribbonOffset < 0 &&
+            ribbonMesh.ribbonOffset < n_cutoff) {
+            ribbonMesh.visible = false;
+            return;
+        }*/
         
+        ribbonMesh.visible = true;
+        //me.tracer.reset(me.origin, me.size, ribbonMesh.ribbonOffset)
+        //me.tracer.iterations = 20;
+
+        var w = 0;
+        var prog = me.progress;
+        if (ribbonMesh.ribbonOffset == 0) {
+            w = 2.8 + 40*Math.sin(me.progress * me.bounce * Math.PI * 2) + 40;
+        } else {
+            w = 2.8 + 10*Math.sin(me.progress * me.bounce * Math.PI * 2) + 10;
+            prog += me.progOff;
+            prog = Math.max(0.0001, prog);
+        }
         ribbonMesh.geometry.update(normal, 
-                                 me.tracer.points, 
-                                 [2.8]);
+                                 me.points[index], //me.tracer.points, 
+                                 [w],
+                                 0,//me.progress*3.9,
+                                 Math.min(1,prog*4 +.00000001));
+        ribbonMesh.frustumCulled = false;
 
     });
     var lastVert = this.ribbon.geometry.vertices[this.ribbon.geometry.vertices.length-1];
     //this.camera.position.x = lastVert.x;
     //this.camera.position.y = lastVert.y;
-
 }
 
 proto.foo = function(tracer, a, b, max, state) {
@@ -82,6 +159,33 @@ proto.arcDriver = function (tracer, angle) {
     this.foo(tracer,0,0,90,state);
     this.foo(tracer,1,0,90,state);
     this.foo(tracer,0,0,90,state);
+    this.foo(tracer,0,0,90,state);
+    this.foo(tracer,0,1,90,state);
+    this.foo(tracer,0,0,90,state);
+    this.foo(tracer,0,0,90,state);
+    this.foo(tracer,0,0,90,state);
+
+
+    /*
+    this.foo(tracer,1,0,90,state);
+    this.foo(tracer,0,0,90,state);
+    this.foo(tracer,0,0,90,state);
+    this.foo(tracer,0,-1,90,state);
+
+    this.foo(tracer,0,0,90,state);
+    this.foo(tracer,0,0,90,state);
+    this.foo(tracer,0,0,90,state);
+    this.foo(tracer,0,1,90,state);
+    this.foo(tracer,0,0,90,state);
+    this.foo(tracer,0,0,90,state);
+    */
+    /*
+    this.foo(tracer,1,0,90,state);
+    this.foo(tracer,0,0,90,state);
+    this.foo(tracer,0,0,90,state);
+    this.foo(tracer,0,0,90,state);
+    this.foo(tracer,-1,0,90,state);
+    */
 }
 
 
@@ -113,14 +217,16 @@ proto.onPreload = function() {
     dirLight.position.set( 0, 0, 1 ).normalize();
     this.scene.add( dirLight );
 
-     // 
+    // 
     // Setup composer
     //
     this.composer = Circ.GetComposer(renderer, this.scene, this.camera);
     this.rgb = composer.rgb; 
+    this.composer.setTiltEnabled(true);; 
+    this.composer.setTiltDepth(0.15);
+    this.composer.setTiltBlur(4, 5);
 
-
-    //
+   //
     // Add some geometry
     //
 
@@ -129,21 +235,19 @@ proto.onPreload = function() {
     //points = hilbert3D( new THREE.Vector3( 0,0,0 ), 200.0, 2, 0, 1, 2, 3, 4, 5, 6, 7 ),
 
 
-    var count = 70;
-    var offsetStep = 5;
+    var count = this.N;
+    var offsetStep = this.O;
     var offset = -1 * offsetStep * Math.floor(count/2);
-    var flipColor = false;
     var tracer = null;
 
     for (var i = 0; i < count; i++) {
         tracer = new this.ArcTracer(this.origin, this.size, offset);
         tracer.iterations = 20;
-        this.arcDriver(tracer, 90*12);
+        this.arcDriver(tracer, 90*200);
 
-        flipColor = !flipColor;
 
         var mat = new THREE.MeshBasicMaterial( { opacity: 1.0, 
-                                                color: flipColor ? csLineA : csLineB,
+                                                color: csLineB,
                                                 //vertexColors: THREE.VertexColors, 
                                                 //wireframe: true 
                                                 } ); 
@@ -151,16 +255,8 @@ proto.onPreload = function() {
         var geoRibbon = new F.PlanerRibbonGeometry(new THREE.Vector3(0,0,1), 
                                  tracer.points, 
                                  [2.8]);
-        /*
-        geoRibbon.vertices.forEach(function(vert, j) {
-            color = new THREE.Color( 0xff00ff );
-            //if (flipColor)
-            color.setHSL(0.6, 1.0, 0.5);
-            geoRibbon.colors.push(color)
-        });
-        */
-
-        //color: 0xff0000
+        this.points.push(tracer.points);
+        
         var line, p, scale = 0.3*5.5, d = 10;
         var mesh = new THREE.Mesh(geoRibbon, mat);
         //mesh.scale.x = mesh.scale.y = mesh.scale.z = .3*5.5;
@@ -243,7 +339,7 @@ proto.ArcTracer = function (origin, size, offset) {
             var nextPoint = new THREE.Vector3(
                                 this.origin.x + (this.xLoc*2*this.size) + size*Math.cos(this.xAngle+(i*dtheta)), 
                                 this.origin.y + (this.yLoc*2*this.size) + size*Math.sin(this.yAngle+(i*dtheta)), 
-                                10*Math.sin(2*Math.PI*this.t/229));
+                                0);//10*Math.sin(2*Math.PI*this.t/70));
             this.points.push(nextPoint);
         }
 
@@ -253,5 +349,5 @@ proto.ArcTracer = function (origin, size, offset) {
 };
 
 
-F.Shots.CircleSpline_5.prototype = proto;
+F.Shots.CircleSpline_6.prototype = proto;
 delete proto;
