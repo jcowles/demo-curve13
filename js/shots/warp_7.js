@@ -22,14 +22,14 @@ proto.onPreload = function() {
 
     
     this.warpSeriesSet = new F.WarpSeriesSet(this.camera, [
-        new F.WarpSeries([CURVE_ARROW, CURVE_HEART, CURVE_ARROW]),
+        new F.WarpSeries([CURVE_ARROW, CURVE_HEART]),
         ]);
 
     this.warpSeriesSet.seriesList[0].settings = new (function() {
-        this.sinAmp = 0.2;
-        this.sinFrq = 12;
-        this.sinPhv = 8;
-        this.spawnRate = 0;
+        this.sinAmp = 0;
+        this.sinFrq = 30;
+        this.sinPhv = 0;
+        this.spawnRate = 10;
         this.cornerAmp = 0;
         this.cornerNum = 0;
         })();
@@ -53,30 +53,34 @@ proto.onDraw = function(time, dt) {
     //this.camera.rotation.z = lerp(this.progress, 0, 6);
     this.camera.position.z = lerp(this.progress, 2, 1.5);
 
-    // XXX Do a more complicated mapping here
-    this.warpSeriesSet.setTime(smoothMap(94.3, 94.7+0.9, 0, 0.5, time));
-
     var boy = this.warpSeriesSet.seriesList[0];
-    
-    boy.setRot(0);
-    boy.setPos(new THREE.Vector3(0, 0, 0));
-    boy.setSize(1.5);
 
-    var triggerTime = 73.8;
-    var endTime = triggerTime + 0.5;
+    var triggerTime = 95.8;
+    var endTime = triggerTime + 0.3;
+
+    // XXX Do a more complicated mapping here
+    this.warpSeriesSet.setTime(smoothMap(94.3, 94.7+0.9, 0, 1, time) + Math.max(0, time - endTime));
+
     if (time > triggerTime) {
+        this.warpSeriesSet.seriesList[0].refIdx = 500;
+
         //boy.setPos(new THREE.Vector3(0, 0, 0));
 
         //boy.settings.sinAmp = 0.5;
         //boy.settings.sinFrq = 75;
 
         boy.settings.sinAmp = smoothMap(triggerTime, endTime,
-                                        0.2, 0.01, time);
+                                        0.0, 0.3, time);
 
+        boy.settings.sinPhv = smoothMap(triggerTime, triggerTime+1,
+                                        1, 5, time);
+        
         boy.setSize(smoothMap(triggerTime, endTime,
-                                        1.5, 1, time));
+                                        1, 2, time));
     }
-    
+
+    boy.setRot(0);
+    boy.setPos(new THREE.Vector3(0, 0, 0));
 }
 
 proto._initWarp = function() {
