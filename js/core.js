@@ -75,7 +75,7 @@ function init() {
         // M Beats 2
         [new F.Shots.Warp_8(), 100.1],
 
-        [new F.Shots.CircleSpline_1(), 103.2],
+        [new F.Shots.CircleSpline_6(), 103.2],
 
         // L Neon beats and crescendo with hard out to outro
         [new F.Shots.Warp_9(), 106.4],
@@ -88,7 +88,7 @@ function init() {
 
     // EDIT ME FOR CHOREOGRAPHY PURPOSES.
     // The number of seconds into the playlist we actually start playback.
-    seq.setOffset(113.1);
+    seq.setOffset();
 }
 
 function animate() {
