@@ -1,7 +1,7 @@
 // The Shots class is declared in shot.js
 
-F.Shots.Outro = function(duration) {
-    F.Shot.call(this, "Outro", duration);
+F.Shots.WhistleBreak = function(duration) {
+    F.Shot.call(this, "WhistleBreak", duration);
     this.mesh = null;
     this.meshes = [];
     this.N = 10;
@@ -26,18 +26,6 @@ proto.onBegin = function() {
 }
 
 proto.onDraw = function(time, dt) {
-    // CREDITS NAMES
-    var jShift = smoothMap(0.1, 0.2, 0, -3000, this.progress) +
-                 smoothMap(0.3, 0.4, 0, -3000, this.progress);
-
-    var aShift = smoothMap(0.1, 0.2, 0, 3000, this.progress) +
-                 smoothMap(0.3, 0.4, 0, 3000, this.progress);
-   
-    this.mj.position.set(2500 + jShift,200,0);
-
-    this.ma.position.set(-2500 + aShift,-200,0);
-
-    this.mt.scale.y = smoothMap(0.62,0.77, 0, 1, this.progress);
 
     if (this.progress > 0.98) {
         this.meshes.forEach(function(m) { m.visible = false; });
@@ -91,29 +79,6 @@ proto.onPreload = function() {
     this.camera.position.z = 1000;
     this.scene = new THREE.Scene();
 
-
-    //
-    // Textured quads for credits
-    //
-    var text = new THREE.ImageUtils.loadTexture("tex/title.png");
-    var texj = new THREE.ImageUtils.loadTexture("tex/jcowles.png");
-    var texa = new THREE.ImageUtils.loadTexture("tex/andru.png");
-    var matt = new THREE.MeshBasicMaterial({map:text, transparent:true});
-    var matj = new THREE.MeshBasicMaterial({map:texj, transparent:true});
-    var mata = new THREE.MeshBasicMaterial({map:texa, transparent:true});
-    var textsize = 1500;
-    var gt = new THREE.PlaneGeometry(textsize,textsize);
-    var gj = new THREE.PlaneGeometry(textsize,textsize);
-    var ga = new THREE.PlaneGeometry(textsize,textsize);
-    this.mt = new THREE.Mesh(gt, matt);
-    this.mj = new THREE.Mesh(gj, matj);
-    this.ma = new THREE.Mesh(ga, mata);
-
-    //this.scene.add(mt);
-    this.scene.add(this.mt);
-    this.scene.add(this.mj);
-    this.scene.add(this.ma);
-
     //
     // Add some geometry
     //
@@ -145,5 +110,5 @@ proto.onPreload = function() {
 
 }
 
-F.Shots.Outro.prototype = proto;
+F.Shots.WhistleBreak.prototype = proto;
 delete proto;
