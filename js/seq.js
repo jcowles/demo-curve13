@@ -122,7 +122,6 @@ F.Seq.prototype = {
         this._lastTime = offsetSecs;
         var shotsElapsedTime = 0;
         for (var i=0; i<this.shots.length; i++) {
-            log("HEY "+ i + " " + shotsElapsedTime);
             if ((offsetSecs >= shotsElapsedTime) &&
                 (offsetSecs < (shotsElapsedTime + this.shots[i].duration))) {
 
