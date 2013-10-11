@@ -33,7 +33,7 @@ proto.onDraw = function(time, dt) {
     var speed = 90000;
     var sizeAdj = 0;
     //this.composer.film.uniforms['grayscale'].value = false;
-    if (time > 14.5 && time < 16.0) {
+    if (time > 14.4 && time < 15.8) {
         speed = 900*Math.cos(time);
         sizeAdj = 0;
         //this.composer.film.uniforms['grayscale'].value = true;
