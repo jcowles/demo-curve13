@@ -5,7 +5,7 @@ CircleSplineBg = 0xFFFFFF;
 csLineA = 0x30D6FF;
 csLineB = 0x333333;
 */
-CircleSplineBg = 0x000000;
+CircleSplineBg = 0x111111;
 csLineA = 0x30D6FF;
 csLineB = 0xFFFFFF;
 

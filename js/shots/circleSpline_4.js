@@ -22,11 +22,12 @@ F.Shots.CircleSpline_4 = function(duration) {
         this.vinDark = 0.2;
     })();
 
-    me = this;
+    var me = this;
     this.seperator = new OnBeat(
                 [9.5, 10.32, 11.13, 11.9, 12.6, 13.4, 14.29],
                 function(time) {
-                    me.rgb.uniforms[ 'amount' ].value = .009*Math.sin(100*Math.sin(time*10)*Math.sin(time*2));
+                    log("hit: " + time)
+                    me.rgb.uniforms[ 'amount' ].value = .09*Math.sin(100*Math.sin(time*10)*Math.sin(time*2));
                 },
                 function(time) {
                     me.rgb.uniforms[ 'amount' ].value = .0;
@@ -35,38 +36,15 @@ F.Shots.CircleSpline_4 = function(duration) {
 
 proto = Object.create(F.Shot.prototype);
 
-OnBeat = function(times, onFunc, offFunc) {
-    this.times = times;
-    this.onFunc = onFunc;
-    this.offFunc = offFunc;
-    this.epsilon = 0.05;
-
-    this.hit = function(time) {
-        for (var i = 0; i < this.times.length; i++) {
-            if (time > this.times[i] && time < this.times[i] + this.epsilon) {
-                this.onFunc(time);
-                return;
-            }
-        }
-        this.offFunc(time);
-    }
-}
-
 proto.onDraw = function(time, dt) {
 
+    this.rgb.uniforms[ 'amount' ].value = 1.0;
     if (this.vignette) {
         this.vignette.uniforms[ "offset" ].value = this.settings.vinOff;
         this.vignette.uniforms[ "darkness" ].value = this.settings.vinDark;
     }
     if (this.rgb) {
         this.seperator.hit(time);
-
-        /*
-        if (time > 9.5 && time < 9.55)
-            this.rgb.uniforms[ 'amount' ].value = .003*Math.sin(100*Math.sin(time*10)*Math.sin(time*2));
-        else
-            this.rgb.uniforms[ 'amount' ].value = .0;
-        */
     }
 
 
@@ -212,22 +190,11 @@ proto.onPreload = function() {
     // 
     // Setup composer
     //
-    this.composer = new THREE.EffectComposer( renderer );
-    this.composer.addPass(new THREE.RenderPass(this.scene, this.camera)); // render to buffer1
-
-    /*
-    var effectFXAA = new THREE.ShaderPass( THREE.FXAAShader );
-    effectFXAA.uniforms[ 'resolution' ].value.set( 1 / window.innerWidth, 1 / window.innerHeight );
-    this.composer.addPass(effectFXAA);
-    */
-    this.vignette = new THREE.ShaderPass(THREE.VignetteShader);
-    this.vignette.uniforms[ "offset" ].value = 1.00;
-    this.vignette.uniforms[ "darkness" ].value = 1.5;
-    this.vignette.renderToScreen = false;
-    this.composer.addPass(this.vignette);
+    this.composer = Circ.GetComposer(renderer, this.scene, this.camera);
+    this.composer.vignette.renderToScreen = true;
 
     this.rgb = new THREE.ShaderPass( THREE.RGBShiftShader );
-    this.rgb.uniforms[ 'amount' ].value = 0.0015;
+    this.rgb.uniforms[ 'amount' ].value = 0.0;
     this.rgb.renderToScreen = true;
     this.composer.addPass( this.rgb );
 
