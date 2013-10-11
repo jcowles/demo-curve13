@@ -6,32 +6,48 @@ F.Shots.CircleSpline_3 = function(duration) {
     this.geom = null;
     this.mat = null;
     this.ribbon = null;
-    this.origin  = new THREE.Vector2(100, -400);
+    this.origin  = new THREE.Vector2(0, 0);
     this.size = 200;
 
     this.settings = new (function() {
         this.rotateX = 0;
         this.rotateY = 0;
-        this.camX = 170;
-        this.camY = -650;
+        this.camX = 0;
+        this.camY = 0;
         this.camZ = 1000;
         this.hue = .6
     })();
+
 };
 
 proto = Object.create(F.Shot.prototype);
 
 proto.onDraw = function(time, dt) {
-    renderer.setClearColor(CircleSplineBg, 1);
+    renderer.setClearColor(CircleSplineBg, 0.5);
     this.camera.position.x = this.settings.camX;
     this.camera.position.y = this.settings.camY;
     this.camera.position.z = this.settings.camZ;
     this.lineGroup.rotation.x = this.settings.rotateX;
     this.lineGroup.rotation.y = this.settings.rotateY;
 
-    var tracer = new F.ArcTracer(this.origin, this.size, 0);
+    var speed = 90000;
+    var sizeAdj = 0;
+    if (time > 14.4 && time < 16.0) {
+        speed = 900*Math.cos(time);
+        sizeAdj = 0;
+    } else if (time > 16.0 && time < 17.5) {
+        this.ribbon.rotation.z = time;
+        speed = 70000;
+        sizeAdj = 90*this.progress;
+    } else {
+        this.ribbon.rotation.z = time;
+        speed = 90000;
+        sizeAdj = 90*this.progress;
+    }
+
+    var tracer = new F.ArcTracer(this.origin, this.size + sizeAdj, 0);
     tracer.iterations = 30;
-    tracer.arc(0,0,this.progress*90000); // can flip either
+    tracer.arc(0,0,this.progress*speed); // can flip either
     /*
     tracer.arc(0,1,90); // can only flip +y
     tracer.arc(-1,0,90); // can only flip -x
@@ -42,7 +58,9 @@ proto.onDraw = function(time, dt) {
 
     this.geom.update(new THREE.Vector3(0,0,1), 
                              tracer.points, 
-                             [2.8]);
+                             [2.8],
+                             0,
+                             1);
     /*
     var geoRibbon = new F.PlanerRibbonGeometry(new THREE.Vector3(0,0,1), 
                              tracer.points, 
@@ -81,6 +99,9 @@ proto.onPreload = function() {
     var dirLight = new THREE.DirectionalLight( 0xffffff, 0.125 );
     dirLight.position.set( 0, 0, 1 ).normalize();
     this.scene.add( dirLight );
+
+    this.composer = Circ.GetComposer(renderer, this.scene, this.camera);
+    this.composer.vignette.renderToScreen = true;
 
     //
     // Add some geometry
@@ -131,9 +152,11 @@ proto.onPreload = function() {
         var line, p, scale = 0.3*5.5, d = 10;
         var mesh = new THREE.Mesh(geoRibbon, mat);
         mesh.scale.x = mesh.scale.y = mesh.scale.z = .3*5.5;
-        mesh.position.x = d;
-        mesh.position.y = d;
+        /*
+        mesh.position.x = 0;
+        mesh.position.y = 0;
         mesh.position.z = 0;
+        */
 
         if (offset == 0) {
             this.geom = geoRibbon;

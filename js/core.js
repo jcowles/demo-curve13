@@ -60,7 +60,12 @@ function init() {
         // S Beat 2
         [new F.Shots.Warp_2(), 76.6],
 
-        [new F.Shots.CircleSpline_1(), 78.2],
+        // Whistle break
+        [new F.Shots.CircleSpline_3(), 78.2],
+            [new F.Shots.CircleSpline_2(), 86.5],
+            [new F.Shots.CircleSpline_4(), 88.0],
+            [new F.Shots.CircleSpline_5(), 89.5],
+            [new F.Shots.CircleSpline_3(), 92.2],
 
         // M Beats 1
         [new F.Shots.Warp_2(), 93.7],
@@ -83,7 +88,7 @@ function init() {
 
     // EDIT ME FOR CHOREOGRAPHY PURPOSES.
     // The number of seconds into the playlist we actually start playback.
-    seq.setOffset(0);
+    seq.setOffset(78.2);
 }
 
 function animate() {

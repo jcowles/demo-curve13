@@ -1,20 +1,15 @@
-
-Circ.Settings = function() {
-    this.composer = new THREE.EffectComposer( renderer );
+Circ = {};
+Circ.GetComposer = function(renderer, scene, camera) {
+    composer = new THREE.EffectComposer( renderer );
     
-    var renderModel = new THREE.RenderPass(this.sceneColored, this.camera);
-    this.composer.addPass( renderModel ); // render to buffer1
+    composer.model = new THREE.RenderPass(scene, camera);
+    composer.addPass(composer.model); // render to buffer1
 
-    var effectBloom = new THREE.BloomPass(2.3, 25, 4.0, 512);
-    this.composer.addPass( effectBloom ); // render to internal buffers, finally to buffer1
+    composer.vignette = new THREE.ShaderPass(THREE.VignetteShader);
+    composer.vignette.uniforms[ "offset" ].value = .7;
+    composer.vignette.uniforms[ "darkness" ].value = 0;
+    composer.vignette.renderToScreen = false;
+    composer.addPass(composer.vignette);
 
-    this.composer.addPass(renderSparks); // render to buffer1
-
-    var renderModelWhite = new THREE.RenderPass(this.sceneWhite, this.camera);
-    renderModelWhite.clear = false;
-    this.composer.addPass(renderModelWhite); // render to buffer1
-    
-    var effectCopy = new THREE.ShaderPass(THREE.CopyShader);
-    effectCopy.renderToScreen = true;
-    this.composer.addPass( effectCopy ); // render to screen
+    return composer;
 }
