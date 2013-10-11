@@ -49,8 +49,6 @@ proto.onDraw = function(time, dt) {
     time = this.progress*190*10;
     var normal = new THREE.Vector3(0,0,1);
 
-        log(me.progress + " - " + me.progress * .5)
-
     this.ribbons.forEach(function(ribbonMesh, index) {
         var p_cutoff = (Math.cos(me.progress*10)*.5 + .5) * (70*5);
         var n_cutoff = -1 * ((Math.sin(me.progress*10)*.5 + .5) * (70*5));
