@@ -24,11 +24,13 @@ F.Seq.prototype = {
             warn("F.Seq cannot play: no shots added");
             return;
         }
+        log("Playing");
         this.audio.currentTime = this.offsetSecs;
         this.audio.play();
     },
 
     pause: function() {
+        log("Paused");
         this.audio.pause();
     },
 

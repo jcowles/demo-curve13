@@ -51,7 +51,7 @@ proto.onDraw = function(time, dt) {
             ribbonMesh.visible = false;
             return;
         }
-
+        
         ribbonMesh.visible = true;
         me.tracer.reset(me.origin, me.size, ribbonMesh.ribbonOffset)
         me.tracer.iterations = 20;
@@ -63,14 +63,12 @@ proto.onDraw = function(time, dt) {
         ribbonMesh.geometry.update(normal, 
                                  me.tracer.points, 
                                  [2.8]);
+        ribbonMesh.frustumCulled = false;
 
     });
     var lastVert = this.ribbon.geometry.vertices[this.ribbon.geometry.vertices.length-1];
     //this.camera.position.x = lastVert.x;
     //this.camera.position.y = lastVert.y;
-    this.ribbon.geometry.frustumCulled = false;
-    this.ribbon.frustumCulled = false;
-
 }
 
 function foo(tracer, a, b, max, state) {
