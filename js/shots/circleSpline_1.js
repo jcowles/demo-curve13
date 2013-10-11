@@ -152,7 +152,7 @@ proto.onPreload = function() {
     //
     this.composer = Circ.GetComposer(renderer, this.scene, this.camera);
     this.composer.setTiltEnabled(true);
-    this.rgb = composer.rgb; 
+    this.rgb = this.composer.rgb; 
 
    //
     // Add some geometry
