@@ -1,7 +1,7 @@
 // The Shots class is declared in shot.js
 
-F.Shots.Warp_3 = function(duration, filenameA, filenameB) {
-    F.Shot.call(this, "Warp_3", duration);
+F.Shots.Warp_7 = function(duration, filenameA, filenameB) {
+    F.Shot.call(this, "Warp_7", duration);
 
     this.settings = new (function() {
         this.sinAmp = 0.01;
@@ -62,7 +62,7 @@ proto.onPreload = function() {
 
 proto.onDraw = function(time, dt) {
 
-    var black = new THREE.Color(0x111144);
+    var black = new THREE.Color(0x000033);
     renderer.setClearColor(black, 1);
 
     // XXX Do a more complicated mapping here
@@ -94,7 +94,7 @@ proto.onDraw = function(time, dt) {
 proto._initWarp = function() {
 }
 
-F.Shots.Warp_3.prototype = proto;
+F.Shots.Warp_7.prototype = proto;
 delete proto;
 
 
