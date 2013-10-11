@@ -138,6 +138,11 @@ proto.setRot = function(angle) {
     this.meshWhite.rotation.z = angle;
 }
 
+proto.setSize = function(size) {
+    this.meshColored.scale.x = this.meshColored.scale.y = this.meshColored.scale.z = size;
+    this.meshWhite.scale.x = this.meshWhite.scale.y = this.meshWhite.scale.z = size;
+}
+
 proto.setNeon = function(amount) {
     this.meshWhite.material.color.copy(new THREE.Color(0xFFFFFF));
     this.meshWhite.material.color.lerp(this.meshColored.material.color, 1-amount)

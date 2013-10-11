@@ -71,29 +71,49 @@ proto.onDraw = function(time, dt) {
     // XXX Do a more complicated mapping here
     this.warpSeriesSet.setTime(this.progress);
 
-    this.warpSeriesSet.seriesList[0].setRot(-90);
-    this.warpSeriesSet.seriesList[0].setPos(
-        vlerp(this.progress,
-            new THREE.Vector3(-2,1,0),
-            new THREE.Vector3(20,1,0) ) );
+    if (this.progress < 0.5) {
 
-    this.warpSeriesSet.seriesList[1].setRot(90);
-    this.warpSeriesSet.seriesList[1].setPos(
-        vlerp(this.progress,
-            new THREE.Vector3(2,-1,0),
-            new THREE.Vector3(-20,-1,0) ) );
+        var angleShift = this.progress * -360; 
+        this.warpSeriesSet.seriesList[0].setRot(-90 + angleShift);
+        this.warpSeriesSet.seriesList[0].setPos(
+            new THREE.Vector3(linMap(0,0.5,   -2,8,this.progress), 1, 0));
 
-    this.warpSeriesSet.seriesList[2].setRot(180);
-    this.warpSeriesSet.seriesList[2].setPos(
-        vlerp(this.progress,
-            new THREE.Vector3(1,2,0),
-            new THREE.Vector3(1,-20,0) ) );
+        this.warpSeriesSet.seriesList[1].setRot(90 + angleShift);
+        this.warpSeriesSet.seriesList[1].setPos(
+            new THREE.Vector3(linMap(0,0.5,    2,-8,this.progress), -1, 0));
 
-    this.warpSeriesSet.seriesList[3].setRot(0);
-    this.warpSeriesSet.seriesList[3].setPos(
-        vlerp(this.progress,
-            new THREE.Vector3(-1,-2,0),
-            new THREE.Vector3(-1,20,0) ) );
+        this.warpSeriesSet.seriesList[2].setRot(180 + angleShift);
+        this.warpSeriesSet.seriesList[2].setPos(
+            new THREE.Vector3(1, linMap(0,0.5,2,-8,this.progress), 0));
+
+        this.warpSeriesSet.seriesList[3].setRot(0 + angleShift);
+        this.warpSeriesSet.seriesList[3].setPos(
+            new THREE.Vector3(-1, linMap(0,0.5,-2,8,this.progress), 0));
+    } else {
+
+        var angleShift = this.progress * -10;
+
+        this.warpSeriesSet.seriesList[0].setRot(-90+angleShift);
+        this.warpSeriesSet.seriesList[0].setPos(
+            new THREE.Vector3(linMap(0.5,1,-8,2,this.progress), 1, 0));
+
+        this.warpSeriesSet.seriesList[1].setRot(90+angleShift);
+        this.warpSeriesSet.seriesList[1].setPos(
+            new THREE.Vector3(linMap(0.5,1,8,-2,this.progress), -1, 0));
+
+        this.warpSeriesSet.seriesList[2].setRot(180+angleShift);
+        this.warpSeriesSet.seriesList[2].setPos(
+            new THREE.Vector3(1, linMap(0.5,1,8,-2,this.progress), 0));
+
+        this.warpSeriesSet.seriesList[3].setRot(0+angleShift);
+        this.warpSeriesSet.seriesList[3].setPos(
+            new THREE.Vector3(-1, smoothMap(0.5,1,-8,2,this.progress), 0));
+
+
+        for (var i = 0; i < this.warpSeriesSet.seriesList.length; i++) {
+            this.warpSeriesSet.seriesList[i].setSize(linMap(0.8,1, 2, 0, this.progress));
+        };
+    }
 
     this.warpSeriesSet.setNeon(0);
 }
