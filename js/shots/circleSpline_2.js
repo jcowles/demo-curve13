@@ -43,6 +43,12 @@ proto.onPreload = function() {
     this.camera.position.z = 1000;
     this.scene = new THREE.Scene();
 
+    // 
+    // Setup composer
+    //
+    this.composer = Circ.GetComposer(renderer, this.scene, this.camera);
+    this.rgb = composer.rgb; 
+
     //
     // Add some geometry
     //

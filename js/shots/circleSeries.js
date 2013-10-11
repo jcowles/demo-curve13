@@ -11,5 +11,10 @@ Circ.GetComposer = function(renderer, scene, camera) {
     composer.vignette.renderToScreen = false;
     composer.addPass(composer.vignette);
 
+    composer.rgb = new THREE.ShaderPass( THREE.RGBShiftShader );
+    composer.rgb.uniforms[ 'amount' ].value = 0.0;
+    composer.rgb.renderToScreen = true;
+    composer.addPass( composer.rgb );
+
     return composer;
 }

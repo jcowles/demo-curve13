@@ -101,7 +101,6 @@ proto.onPreload = function() {
     this.scene.add( dirLight );
 
     this.composer = Circ.GetComposer(renderer, this.scene, this.camera);
-    this.composer.vignette.renderToScreen = true;
 
     //
     // Add some geometry
