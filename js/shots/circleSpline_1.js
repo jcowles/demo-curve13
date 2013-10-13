@@ -1,14 +1,10 @@
 // The Shots class is declared in shot.js
 
-/*
-CircleSplineBg = 0xFFFFFF;
-csLineA = 0x30D6FF;
-csLineB = 0x333333;
-*/
+
 CircleSplineBg = 0x111111;
 csLineA = 0x30D6FF;
 csLineB = 0xFFFFFF;
-
+csIters = 10;
 
 F.Shots.CircleSpline_1 = function(duration) {
     F.Shot.call(this, "CircleSpline_1", duration);
@@ -143,25 +139,15 @@ proto.onPreload = function() {
     this.camera.position.z = 1000;
     this.scene = new THREE.Scene();
 
-    var dirLight = new THREE.DirectionalLight( 0xffffff, 0.125 );
-    dirLight.position.set( 0, 0, 1 ).normalize();
-    this.scene.add( dirLight );
-
     // 
     // Setup composer
     //
     this.composer = Circ.GetComposer(renderer, this.scene, this.camera);
-    this.composer.setTiltEnabled(true);
-    this.rgb = this.composer.rgb; 
 
-   //
+    //
     // Add some geometry
     //
-
     this.lineGroup = new THREE.Object3D();
-
-    //points = hilbert3D( new THREE.Vector3( 0,0,0 ), 200.0, 2, 0, 1, 2, 3, 4, 5, 6, 7 ),
-
 
     var count = 70;
     var offsetStep = 5;
@@ -171,34 +157,22 @@ proto.onPreload = function() {
 
     for (var i = 0; i < count; i++) {
         tracer = new this.ArcTracer(this.origin, this.size, offset);
-        tracer.iterations = 20;
+        tracer.iterations = csIters;
         this.arcDriver(tracer, 90*12);
 
         flipColor = !flipColor;
 
         var mat = new THREE.MeshBasicMaterial( { opacity: 1.0, 
                                                 color: flipColor ? csLineA : csLineB,
-                                                //vertexColors: THREE.VertexColors, 
-                                                //wireframe: true 
                                                 } ); 
 
         var geoRibbon = new F.PlanerRibbonGeometry(new THREE.Vector3(0,0,1), 
                                  tracer.points, 
                                  [2.8]);
         this.points.push(tracer.points);
-        /*
-        geoRibbon.vertices.forEach(function(vert, j) {
-            color = new THREE.Color( 0xff00ff );
-            //if (flipColor)
-            color.setHSL(0.6, 1.0, 0.5);
-            geoRibbon.colors.push(color)
-        });
-        */
 
-        //color: 0xff0000
         var line, p, scale = 0.3*5.5, d = 10;
         var mesh = new THREE.Mesh(geoRibbon, mat);
-        //mesh.scale.x = mesh.scale.y = mesh.scale.z = .3*5.5;
         mesh.position.x = d;
         mesh.position.y = d;
         mesh.position.z = 0;

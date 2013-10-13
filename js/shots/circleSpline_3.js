@@ -98,10 +98,6 @@ proto.onPreload = function() {
     this.camera.position.z = 1000;
     this.scene = new THREE.Scene();
 
-    var dirLight = new THREE.DirectionalLight( 0xffffff, 0.125 );
-    dirLight.position.set( 0, 0, 1 ).normalize();
-    this.scene.add( dirLight );
-
     this.composer = Circ.GetComposer(renderer, this.scene, this.camera);
 
     //
@@ -109,9 +105,6 @@ proto.onPreload = function() {
     //
 
     this.lineGroup = new THREE.Object3D();
-
-    //points = hilbert3D( new THREE.Vector3( 0,0,0 ), 200.0, 2, 0, 1, 2, 3, 4, 5, 6, 7 ),
-
 
     var count = 70;
     var offsetStep = 5;
