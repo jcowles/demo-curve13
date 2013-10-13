@@ -118,6 +118,7 @@ F.Seq.prototype = {
     },
 
     setOffset: function(offsetSecs) {
+        offsetSecs = offsetSecs || 0;
         this.offsetSecs = offsetSecs;
         this._lastTime = offsetSecs;
         var shotsElapsedTime = 0;
