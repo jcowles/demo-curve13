@@ -1,7 +1,7 @@
 <html>
     <head>
         <!-- External libs -->
-        <script src="js/extern/three.js"></script>
+        <script src="js/extern/three.min.js"></script>
         <script src="js/extern/stats.min.js"></script>
         <script src="js/extern/dat.gui.min.js"></script>
         <script src="js/extern/shaders/ConvolutionShader.js"></script>
@@ -130,9 +130,8 @@
 
                 if (e.keyCode == ESC) { 
                     if (seq.isPlaying()) {
-                        seq.pause()
-                    } else {
-                        seq.play()
+                                         } else {
+                        
                     }
                 }  else {
                     console.log("Time: " + seq.getTime() + "s" + 
@@ -141,7 +140,7 @@
             }
 
         </script>
-        <a id="foo" style="width: 50%; color:#cc0000; font-family: sans; font-size: 10px; text-decoration: none; display:block;"
+        <a id="foo" style="width: 50%; color:#cc0000; margin: 0 auto; text-align:center; margin-top: 10%; font-family: sans; font-size: 10px; text-decoration: none; display:block;"
             onclick='document.getElementById("foo").style.display="none"; toggleFullScreen()' href="#"><pre>
                                     __          
   ____ ___  ___ ____   ____  __ ___/  |_  ____  
@@ -151,7 +150,8 @@ _/ __ \\  \/  // __ \_/ ___\|  |  \   __\/ __ \
      \/      \/    \/     \/                 \/
 </pre></a>
         <audio id="soundtrack" 
-                src="music/audio.mp3" 
+                src="music/audio.ogg" 
+		type="audio/ogg"
                 style="display: none" 
                 oncanplay="_audioReady = true;"
                 onplaying="beginPlaying();"></audio>
