@@ -140,20 +140,39 @@
             }
 
         </script>
-        <a id="foo" style="width: 50%; color:#cc0000; margin: 0 auto; text-align:center; margin-top: 10%; font-family: sans; font-size: 10px; text-decoration: none; display:block;"
-            onclick='document.getElementById("foo").style.display="none"; toggleFullScreen()' href="#"><pre>
+        <div id="foo" style="font-family: helvetica, sans-serif; font-size:
+            .9em; width:50%; margin: 0 auto; margin-top: 20%;text-align: center; color:
+            #aa0000">
+            <a style="color:#cc0000; font-family: sans; font-size: 10px; text-decoration: none;"
+                onclick='document.getElementById("foo").style.display="none"; toggleFullScreen()' href="#"><pre>
                                     __          
   ____ ___  ___ ____   ____  __ ___/  |_  ____  
 _/ __ \\  \/  // __ \_/ ___\|  |  \   __\/ __ \ 
 \  ___/ >    <\  ___/\  \___|  |  /|  | \  ___/ 
  \___  >__/\_ \\___  >\___  >____/ |__|  \___  >
      \/      \/    \/     \/                 \/
-</pre></a>
+</pre>
+            </a><br/>
+            <span style="color:#ccc; font-weight: bold;">Curve 13</span>
+            <span style="font-family: helvetica, sans-serif; font-size:
+                .9em; text-align: center; color: #aa0000">by Andrew Butts and Jeremy Cowles</span>
+        </div>
         <audio id="soundtrack" 
                 src="music/audio.ogg" 
 		type="audio/ogg"
                 style="display: none" 
                 oncanplay="_audioReady = true;"
                 onplaying="beginPlaying();"></audio>
+        <script type="text/javascript">
+          var _gaq = _gaq || [];
+          _gaq.push(['_setAccount', 'UA-3537030-1']);
+          _gaq.push(['_trackPageview']);
+
+          (function() {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+          })();
+        </script>
     </body>
 </html>
