@@ -1,8 +1,9 @@
 /**
- * given a curve, in a single 2d plane, generates a triangle strip ribbon.
+ * Given a curve, in a single 2d plane, generates a triangle strip ribbon.
+ * With a little effort, this could be generalized to a 3-space curve/ribbon.
  *
  * @normal -- a single THREE.Vector3d
- * @curveVerts -- the vertices of the curve
+ * @curveVerts -- the Vector3d vertices of the curve
  * @widths -- either a single width or one width per vert
  *
  */
@@ -28,14 +29,7 @@ F.PlanerRibbonGeometry.prototype.update = function(normal, curveVerts, widths, a
         this._computeLookup(curveVerts);
     
     this.dynamic = true;
-    //this.buffersNeedUpdate = true;
     this.verticesNeedUpdate = true;
-    this.elementsNeedUpdate = true;
-    //this.colorsNeedUpdate = true;
-    //this.uvsNeedUpdate = true;
-    //this.normalsNeedUpdate = true;
-    //this.tangentsNeedUpdate = true;
-    //this.lineDistancesNeedUpdate = true;
 
     var start;
     var end;
@@ -85,7 +79,7 @@ F.PlanerRibbonGeometry.prototype.update = function(normal, curveVerts, widths, a
         //this._collapse(end+1, start-1, vert_0);
     }
     
-    // not sure what this does, seems related to culling
+    // We didn't need this, but may be desirable if this code is reused
     //this.computeCentroids();
 }
 
@@ -234,6 +228,7 @@ F.PlanerRibbonGeometry.prototype._updateVerts = function(normal, curveVerts,
     }
 
     // Add one last quad, for wrapping
+    // Note: this only works for trivial cases, but was enough for our purposes.
     if (genFaces) {
         this._addVert(index*2, cotangent1.clone().multiplyScalar(-width).add(vert).add(zBump));
         this._addVert(index*2+1, cotangent2.clone().multiplyScalar(width).add(vert).add(zBump));
@@ -271,15 +266,4 @@ F.PlanerRibbonGeometry.prototype._addFace = function(index, a, b, c, normal) {
         // Leveraging the fact that we know normals are fixed 
     }
 }
-
-F.PlanerRibbonGeometry.prototype._addUv= function(index, uva, uvb, uvc) {
-    if (this.faceVertexUvs[0].length == index) {
-        this.faceVertexUvs[0].push([uva, uvb, uvc]);
-    } else {
-        this.faceVertexUvs[0][index][0].copy(uva);
-        this.faceVertexUvs[0][index][1].copy(uvb);
-        this.faceVertexUvs[0][index][2].copy(uvc);
-    }
-}
-
 
