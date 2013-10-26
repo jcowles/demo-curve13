@@ -70,13 +70,11 @@ F.PlanerRibbonGeometry.prototype.update = function(normal, curveVerts, widths, a
         this._updateVerts(normal, curveVerts, widths, start, curveVerts.length-1, face_i, uv_i, vert_0, vert_N);
 
         // For the second strip, we explicitly pin the start point to the beginning of the curve
+        // NOTE: this only works in a limited/trivial way.
         vert_N = temp;
         vert_0 = curveVerts[0].clone();
         this._updateVerts(normal, curveVerts, widths, curveVerts.length, curveVerts.length+1, face_i, uv_i, vert_0, vert_N);
         this._collapse(0, start-1, start);
-
-        // Since we're inverted, we collapse the points between start and end
-        //this._collapse(end+1, start-1, vert_0);
     }
     
     // We didn't need this, but may be desirable if this code is reused
