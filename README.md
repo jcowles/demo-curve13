@@ -4,6 +4,8 @@ Created by Andrew Butts and Jeremy Cowles for 2013 Pixar demo party.
 
 This demo was written in 7 days, which is reflected in the state of the code.
 
+View it live here: http://visualcore.com/webgl/curve13
+
 **/index.html**
  * The main entry point of the demo 
 
@@ -23,7 +25,6 @@ This demo was written in 7 days, which is reflected in the state of the code.
 
 **/js/geom**
  * ribbon.js: curve-to-triangle strip algorithm, implemented as Three.js Geometry object
- ** Used in every effect
 
 **/js/shots/...**
  * Various effects and shared settings; the real production code. 
