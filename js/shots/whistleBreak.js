@@ -5,12 +5,7 @@ F.Shots.WhistleBreak = function(duration) {
     this.mesh = null;
     this.meshes = [];
     this.N = 10;
-    this.points = [];/*[new THREE.Vector3(-1900,0,0), 
-                   new THREE.Vector3(-100,0,0), 
-                   new THREE.Vector3(400,0,0), 
-                   new THREE.Vector3(700,0,0),
-                   new THREE.Vector3(1900,0,0),
-                 ];*/
+    this.points = [];
     for (var i = -1900; i <= 1900; i++) {
         this.points.push(new THREE.Vector3(i,0,0));
         var x = 200;
@@ -30,7 +25,6 @@ proto.onDraw = function(time, dt) {
     if (this.progress > 0.98) {
         this.meshes.forEach(function(m) { m.visible = false; });
         return;
-        //this.mesh.visible = true;
     }
     var me = this;
     var pi2 = Math.PI*2;
@@ -57,13 +51,6 @@ proto.onDraw = function(time, dt) {
                           f(a));
         m.material.wireframe = Math.random() > 0.5 + me.progress*.5;
     });
-    /*
-    this.mesh.geometry.update(new THREE.Vector3(0,0,1), 
-                              this.points, 
-                             [prog * 200],
-                             f(), 
-                             prog*speed);
-                             */
 }
 
 proto.getGui = function() {
@@ -84,7 +71,6 @@ proto.onPreload = function() {
     //
 
     for (var i = 0; i < this.N; i++) {
-        //var offset = i//(i/this.N) * (this.N / 2) - this.N/2;
         var material = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: false } );
         var geometry = new F.PlanerRibbonGeometry(new THREE.Vector3(0,0,1), 
                                  this.points, 
@@ -95,19 +81,6 @@ proto.onPreload = function() {
         this.meshes.push(mesh);
         this.scene.add(mesh);
     }
-
-    /*
-    var geometry = new F.PlanerRibbonGeometry(new THREE.Vector3(0,0,1), 
-                             this.points, 
-                             [200]);
-
-    var material = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
-    this.mesh = new THREE.Mesh( geometry, material );
-    this.scene.add(this.mesh);
-    this.mesh.visible = false;
-    */
-
-
 }
 
 F.Shots.WhistleBreak.prototype = proto;

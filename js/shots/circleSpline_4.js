@@ -43,10 +43,12 @@ proto.onDraw = function(time, dt) {
         this.reverse = true;
 
     this.rgb.uniforms[ 'amount' ].value = 1.0;
+
     if (this.vignette) {
         this.vignette.uniforms[ "offset" ].value = this.settings.vinOff;
         this.vignette.uniforms[ "darkness" ].value = this.settings.vinDark;
     }
+
     if (this.rgb) {
         this.seperator.hit(time);
         this.rgb.uniforms[ 'amount' ].value = this.rgbAmt;
@@ -57,10 +59,9 @@ proto.onDraw = function(time, dt) {
 
     renderer.setClearColor(CircleSplineBg, 1);
 
-    this.camera.position.x = -200 + this.progress*-1300; //this.settings.camX;
+    this.camera.position.x = -200 + this.progress*-1300; 
     this.camera.position.y = this.settings.camY;
-    this.camera.position.z = 800;//1000+ 200*Math.sin(time/2);//dt*20;
-    //this.camera.position.z = this.settings.camZ;
+    this.camera.position.z = 800;
 
     this.lineGroup.rotation.x = this.settings.rotateX;
     this.lineGroup.rotation.y = this.settings.rotateY;
@@ -69,9 +70,9 @@ proto.onDraw = function(time, dt) {
     var t = this.progress * 90*9;
     var x, y;
     this.ribbons.forEach(function(ribbonMesh, index) {
-        var tracer = new me.ArcTracer(me.origin, me.size, ribbonMesh.ribbonOffset);
+        var tracer = new Circ.ArcTracer(me.origin, me.size, ribbonMesh.ribbonOffset);
         tracer.iterations = 3;
-        var ti = t*4 - ribbonMesh.ribbonOffset;// + Math.cos(time*2)*90;
+        var ti = t*4 - ribbonMesh.ribbonOffset;
         if (ti < 0)
             ti = 0;
         if (ti == 0)
@@ -85,33 +86,7 @@ proto.onDraw = function(time, dt) {
         
         ribbonMesh.geometry.vertices = tracer.points;
         ribbonMesh.geometry.verticesNeedUpdate = true;
-        /*
-        ribbonMesh.geometry.update(new THREE.Vector3(0,0,1), 
-                                 tracer.points, 
-                                 [1]);
-                                 */
-
     });
-
-
-    //x = this.geom.vertices[this.geom.vertices.length - 1].x;
-    //y = this.geom.vertices[this.geom.vertices.length - 1].y;
-    //this.camera.position.x = .9* this.camera.position.x + .1 *x;//-500 + this.progress*-1500; //this.settings.camX;
-    //this.camera.position.y = .9* this.camera.position.y + .1 *y;//-500 + this.progress*-1500; //this.settings.camX;
-    //this.camera.position.x = x-500;//-500 + this.progress*-1500; //this.settings.camX;
-    //this.camera.position.y = y;//-500 + this.progress*-1500; //this.settings.camX;
-
-}
-
-proto.applyTrace = function(tracer, a, b, max, state) {
-    if (state.angle < max) {
-        tracer.arc(a,b,state.angle,state.lock,state.time);
-        state.lock = true;
-    } else {
-        tracer.arc(a,b,max,state.lock,state.time);
-        state.angle -= max;
-    }
-    return state;
 }
 
 proto.arcDriver = function(tracer, angle, time) {
@@ -119,49 +94,30 @@ proto.arcDriver = function(tracer, angle, time) {
               angle: angle,
               time: time};
 
-    this.applyTrace(tracer,0,0,90,state);
-    this.applyTrace(tracer,0,1,90,state);
-    this.applyTrace(tracer,-1,0,90,state);
-    this.applyTrace(tracer,0,0,90,state);
-    this.applyTrace(tracer,0,0,90,state);
-    this.applyTrace(tracer,0,-1,90,state);
-    this.applyTrace(tracer,0,0,90,state);
-    this.applyTrace(tracer,0,0,90,state);
-    this.applyTrace(tracer,-1,0,90,state);
-    this.applyTrace(tracer,0,0,90,state);
-    this.applyTrace(tracer,-1,0,90,state);
-    this.applyTrace(tracer,0,0,90,state);
-    this.applyTrace(tracer,0,0,90,state);
-    this.applyTrace(tracer,0,1,90,state);
-    this.applyTrace(tracer,0,0,90,state);
-    this.applyTrace(tracer,0,0,90,state);
-    this.applyTrace(tracer,-1,0,90,state);
-    this.applyTrace(tracer,0,0,90,state);
-    this.applyTrace(tracer,0,0,90,state);
-    this.applyTrace(tracer,0,1,90,state);
-    this.applyTrace(tracer,0,0,90,state);
-    this.applyTrace(tracer,0,0,90,state);
-    this.applyTrace(tracer,-1,0,90,state);
-
-    //this.applyTrace(tracer,0,0,90,state);
-    //this.applyTrace(tracer,0,0,90,state);
-    //this.applyTrace(tracer,1,0,90,state);
-    //this.applyTrace(tracer,0,0,90,state);
-
-    /*
-    state = this.applyTrace(tracer,0,0,90,state);
-    state = this.applyTrace(tracer,0,1,90,state);
-    state = this.applyTrace(tracer,-1,0,90,state);
-    state = this.applyTrace(tracer,0,0,90,state);
-    state = this.applyTrace(tracer,0,0,90,state);
-    state = this.applyTrace(tracer,0,-1,90,state);
-
-    state = this.applyTrace(tracer,1,0,90,state);
-    state = this.applyTrace(tracer,0,0,90,state);
-    */
+    Circ.applyAngle(tracer,0,0,90,state);
+    Circ.applyAngle(tracer,0,1,90,state);
+    Circ.applyAngle(tracer,-1,0,90,state);
+    Circ.applyAngle(tracer,0,0,90,state);
+    Circ.applyAngle(tracer,0,0,90,state);
+    Circ.applyAngle(tracer,0,-1,90,state);
+    Circ.applyAngle(tracer,0,0,90,state);
+    Circ.applyAngle(tracer,0,0,90,state);
+    Circ.applyAngle(tracer,-1,0,90,state);
+    Circ.applyAngle(tracer,0,0,90,state);
+    Circ.applyAngle(tracer,-1,0,90,state);
+    Circ.applyAngle(tracer,0,0,90,state);
+    Circ.applyAngle(tracer,0,0,90,state);
+    Circ.applyAngle(tracer,0,1,90,state);
+    Circ.applyAngle(tracer,0,0,90,state);
+    Circ.applyAngle(tracer,0,0,90,state);
+    Circ.applyAngle(tracer,-1,0,90,state);
+    Circ.applyAngle(tracer,0,0,90,state);
+    Circ.applyAngle(tracer,0,0,90,state);
+    Circ.applyAngle(tracer,0,1,90,state);
+    Circ.applyAngle(tracer,0,0,90,state);
+    Circ.applyAngle(tracer,0,0,90,state);
+    Circ.applyAngle(tracer,-1,0,90,state);
 }
-
-
 
 proto.getGui = function() {
     //
@@ -198,7 +154,6 @@ proto.onPreload = function() {
     //
     // Add some geometry
     //
-
     this.lineGroup = new THREE.Object3D();
 
     var count = 70;
@@ -208,7 +163,7 @@ proto.onPreload = function() {
     var tracer = null;
 
     for (var i = 0; i < count; i++) {
-        tracer = new this.ArcTracer(this.origin, this.size, offset);
+        tracer = new Circ.ArcTracer(this.origin, this.size, offset);
 
         this.arcDriver(tracer, 9000, 0);
         flipColor = !flipColor;
@@ -244,72 +199,6 @@ proto.onPreload = function() {
 
     this.scene.add(this.lineGroup);
 }
-
-
-
-// helper functions
-var DegToRad = (Math.PI/180);
-
-proto.ArcTracer = function (origin, size, offset) {
-    this.origin = origin; 
-    this.size = size;
-    this.offset = offset;
-    this.xLoc = 0;
-    this.yLoc = 0;
-    this.xAngle = 0;
-    this.yAngle = 0;
-    this.points = [];
-    this.t = 0;
-    this.iterations = 3;
-
-    this.arc = function (xAdj, yAdj, sweepDeg, lock, time) {
-        lock = lock || false;
-        var start = this.points.length == 0 ? 0 : 1;
-
-        if (lock) {
-            if (this.points.length == 0) {
-                console.error("Unable to lock with zero points!");
-            }
-            // lock all generated verts to the last generated vertex
-            var point = this.points[this.points.length-1];
-            for (var i = start; i < this.iterations; i++) {
-                this.points.push(point);
-            }
-            return;
-        }
-
-        var sweepRad = sweepDeg * DegToRad; 
-        
-        if (xAdj != 0) {
-            this.xLoc += xAdj;
-            this.xAngle += Math.PI * xAdj;
-            this.offset *= -1;
-        }
-        if (yAdj != 0) {
-            this.yLoc += yAdj;
-            this.yAngle += Math.PI * yAdj;
-            this.offset *= -1;
-        }
-
-        var size = this.size + this.offset;
-
-        // subtract one to close the circle at angle = 360
-        var dtheta = sweepRad / (this.iterations-1);
-
-        for (var i = start; i < this.iterations; i++) {
-            this.t += 1;
-            var nextPoint = new THREE.Vector3(
-            this.origin.x + (this.xLoc*2*this.size) + size*Math.cos(this.xAngle+(i*dtheta)), 
-            this.origin.y + (this.yLoc*2*this.size) + size*Math.sin(this.yAngle+(i*dtheta)), 
-                                10);
-            this.points.push(nextPoint);
-        }
-
-
-        this.xAngle += sweepRad;
-        this.yAngle += sweepRad;
-    }
-};
 
 F.Shots.CircleSpline_4.prototype = proto;
 delete proto;
